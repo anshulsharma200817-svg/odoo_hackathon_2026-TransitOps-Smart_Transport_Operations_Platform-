@@ -46,7 +46,7 @@ function computeMockSummary(filters = {}) {
 
   const trips = readMockTrips();
   const scoped = filters.type || filters.status || filters.region
-    ? trips.filter((t) => vehicleIds.has(String(t.vehicle_id)))
+    ? trips.filter((t) => vehicleIds.has(String(t.vehicle_id || t.vehicle)))
     : trips;
 
   return {

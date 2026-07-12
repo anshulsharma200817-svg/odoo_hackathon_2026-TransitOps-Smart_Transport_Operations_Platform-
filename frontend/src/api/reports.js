@@ -25,7 +25,7 @@ function computeMockReport() {
 
   return vehicles.map((v) => {
     const vTrips = trips.filter(
-      (t) => String(t.vehicle_id) === String(v.id) && t.status === TRIP_STATUS.COMPLETED,
+      (t) => String(t.vehicle_id || t.vehicle) === String(v.id) && t.status === TRIP_STATUS.COMPLETED,
     );
     const distance = vTrips.reduce((acc, t) => acc + (Number(t.planned_distance) || 0), 0);
 

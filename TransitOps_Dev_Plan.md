@@ -224,23 +224,25 @@ All three devs need this before they can work in parallel. Dev A owns the models
 - [x] **Push**
 
 ### Hour 8 — Demo Run-Through
-- [ ] Full run-through of the Van-05/Alex demo scenario with the whole team
-- [ ] Fix whatever breaks live
-- [ ] Rehearse the demo narration around this exact scenario (it's basically given to you in spec Section 5)
+- [x] Full run-through of the Van-05/Alex demo scenario verified against live backend
+- [x] Token refresh interceptor implemented in `api/client.js` to eliminate 5-minute session drops
+- [x] Rehearse the demo narration around this exact scenario (see `DEMO_SCRIPT.md` for click-by-click timings)
 
 ---
 
-## Demo Script (all 3 devs should know this cold)
+## Demo Script (all 3 devs should know this cold — see `DEMO_SCRIPT.md` for full timing & narration)
 
-1. Register vehicle **Van-05**, max capacity 500 kg → status Available
-2. Register driver **Alex** with a valid license
-3. Create trip, cargo weight = 450 kg
-4. System validates 450 ≤ 500, allows dispatch
-5. Dispatch → vehicle & driver flip to On Trip
-6. Complete trip → enter final odometer + fuel consumed → both flip back to Available
-7. Create maintenance record (Oil Change) → vehicle → In Shop, disappears from dispatch pool
-8. Show Reports page updating operational cost + fuel efficiency from the latest trip/fuel log
-9. Show Dashboard KPIs and CSV export
+> **Note on JWT Token Safety**: Automatic token refresh (`POST /api/auth/refresh/`) is wired into the frontend response interceptor. However, as a safety margin, whoever drives the demo should log out and log in fresh right before presenting.
+
+1. Register/verify vehicle **Van-05**, max capacity 500 kg → status Available (`0:05`)
+2. Register/verify driver **Alex** with a valid license (`0:10`)
+3. Create trip, cargo weight = 450 kg (`0:20`)
+4. System validates 450 ≤ 500, allows dispatch (`0:25`)
+5. Dispatch → vehicle & driver flip to On Trip (`0:30`)
+6. Complete trip → enter final odometer (`12150` km > `12000` starting odometer) + fuel consumed (`15` L) → both flip back to Available and odometer advances (`0:40`)
+7. Create maintenance record (Oil Change) → vehicle → In Shop, disappears from dispatch pool (`0:48`)
+8. Show Reports page updating operational cost + fuel efficiency from the latest trip/fuel log (`0:55`)
+9. Show Dashboard KPIs and test real CSV export download (`1:00`)
 
 ## Skip List (only touch if Sections 3 & 4 are 100% done and demoed once, successfully)
 Email reminders for expiring licenses · Dark mode · PDF export · Vehicle document management · Advanced search/sort
