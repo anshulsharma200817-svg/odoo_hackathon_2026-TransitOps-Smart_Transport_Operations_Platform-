@@ -139,28 +139,31 @@ All three devs need this before they can work in parallel. Dev A owns the models
 - [x] **Push**
 
 ### Hour 3 — Fuel & Expense
-- [ ] `FuelLog` model: `vehicle` (FK), `liters`, `cost`, `date`
-- [ ] `Expense` model: `vehicle` (FK), `type` (toll/maintenance/other), `amount`, `date`
-- [ ] CRUD endpoints for both
-- [ ] **Push**
+- [x] `FuelLog` model: `vehicle` (FK), `liters`, `cost`, `date`
+- [x] `Expense` model: `vehicle` (FK), `type` (toll/maintenance/other), `amount`, `date`
+- [x] CRUD endpoints for both
+- [x] **Push**
 
 ### Hour 4 — Dashboard KPI Endpoint
-- [ ] `/api/dashboard/` returns in one payload:
+- [x] `/api/dashboard/` returns in one payload:
   - Active Vehicles, Available Vehicles, Vehicles In Maintenance
   - Active Trips, Pending Trips
   - Drivers On Duty
   - **Fleet Utilization %** = `(Vehicles On Trip / Total Active Vehicles) × 100`
-- [ ] Add query params for filters: `?type=`, `?status=`, `?region=`
-- [ ] **Push**
+- [x] Add query params for filters: `?type=`, `?status=`, `?region=`
+- [x] **Push**
 
 ### Hour 5 — Reports + CSV
 - [ ] `/api/reports/` per-vehicle:
   - **Fuel Efficiency** = `Distance / Fuel`
-  - **Operational Cost** = `Fuel + Maintenance`
+  - **Operational Cost** = `Fuel + Maintenance + Expenses (excluding MAINTENANCE-type)` — see decision log below, this diverges from the spec's literal wording
   - **ROI** = `(Revenue − (Maintenance + Fuel)) / Acquisition Cost`
 - [ ] `/api/reports/export/csv/` — convert the report table to CSV, return as file download (PDF export is optional, skip unless time remains)
 - [ ] **Push**
 
+**⚠ Decision log (done in Hour 3, ahead of schedule):** Operational Cost now includes non-MAINTENANCE-type `Expense` amounts (tolls, misc costs) on top of Fuel + Maintenance, rather than the spec's literal `Fuel + Maintenance` only. MAINTENANCE-type Expense entries are excluded to avoid double-counting against `MaintenanceLog.cost`. Verified against Van-05: `65.50 (fuel) + 12.75 (toll) + 50 (maintenance) = 128.25`. Flagged to Dev A/Dev C — revisit if the team wants strict spec compliance instead.
+
+**⚠ Open blocker:** `revenue` in the ROI formula is hardcoded to `0` — no revenue field/model exists anywhere in the spec's entity list (Section 6). Every vehicle will show negative ROI until the team decides where revenue comes from (per-trip rate? manual entry field on Vehicle or Trip?). Needs resolving before this section is truly done — currently the formula runs but the output isn't meaningful.
 ### Hours 6-8 — Filters, Bug Fixes, Support
 - [ ] Add filters (vehicle type, status, region) to list endpoints where missing
 - [ ] Help Dev C wire up chart data (utilization bar, cost line chart) — make sure `/api/dashboard/` and `/api/reports/` shapes are chart-friendly

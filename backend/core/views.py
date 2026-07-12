@@ -161,16 +161,43 @@ class DashboardView(APIView):
 
     def get(self, request):
         vehicles = Vehicle.objects.exclude(status=Vehicle.Status.RETIRED)
+
+        # --- optional filters ------------------------------------------------
+        vehicle_type = request.query_params.get("type")
+        vehicle_status = request.query_params.get("status")
+        region = request.query_params.get("region")
+        if vehicle_type:
+            vehicles = vehicles.filter(type__iexact=vehicle_type)
+        if vehicle_status:
+            vehicles = vehicles.filter(status=vehicle_status)
+        if region:
+            vehicles = vehicles.filter(region__iexact=region)
+        # ---------------------------------------------------------------------
+
         total_active = vehicles.count()
         on_trip = vehicles.filter(status=Vehicle.Status.ON_TRIP).count()
         utilization = (on_trip / total_active * 100) if total_active else 0
+
+        # Trip / driver counts scope to the filtered vehicle set when filters
+        # are active; without filters they reflect the whole fleet.
+        vehicle_ids = list(vehicles.values_list("id", flat=True))
+        if vehicle_type or vehicle_status or region:
+            active_trips = Trip.objects.filter(
+                status=Trip.Status.DISPATCHED, vehicle_id__in=vehicle_ids
+            ).count()
+            pending_trips = Trip.objects.filter(
+                status=Trip.Status.DRAFT, vehicle_id__in=vehicle_ids
+            ).count()
+        else:
+            active_trips = Trip.objects.filter(status=Trip.Status.DISPATCHED).count()
+            pending_trips = Trip.objects.filter(status=Trip.Status.DRAFT).count()
 
         data = {
             "active_vehicles": total_active,
             "available_vehicles": vehicles.filter(status=Vehicle.Status.AVAILABLE).count(),
             "vehicles_in_maintenance": vehicles.filter(status=Vehicle.Status.IN_SHOP).count(),
-            "active_trips": Trip.objects.filter(status=Trip.Status.DISPATCHED).count(),
-            "pending_trips": Trip.objects.filter(status=Trip.Status.DRAFT).count(),
+            "active_trips": active_trips,
+            "pending_trips": pending_trips,
             "drivers_on_duty": Driver.objects.filter(status=Driver.Status.ON_TRIP).count(),
             "fleet_utilization_pct": round(utilization, 2),
         }
@@ -184,14 +211,25 @@ class ReportsView(APIView):
         report = []
         for v in Vehicle.objects.all():
             distance = sum(
-                (t.final_odometer or 0) for t in v.trips.filter(status=Trip.Status.COMPLETED)
-            )
+                (t.planned_distance for t in v.trips.filter(status=Trip.Status.COMPLETED)),
+                start=0
+            ) or 0
             fuel = sum((f.liters for f in v.fuel_logs.all()), start=0) or 0
             fuel_cost = sum((f.cost for f in v.fuel_logs.all()), start=0) or 0
             maintenance_cost = sum((m.cost for m in v.maintenance_logs.all()), start=0) or 0
-            op_cost = fuel_cost + maintenance_cost
+            # Exclude MAINTENANCE-type expenses to avoid double-counting against MaintenanceLog.cost
+            other_expenses = sum(
+                (e.amount for e in v.expenses.exclude(type=Expense.Type.MAINTENANCE)), start=0
+            ) or 0
+            op_cost = fuel_cost + maintenance_cost + other_expenses
             fuel_efficiency = (distance / fuel) if fuel else 0
-            revenue = 0  # plug in real revenue source if tracked
+            
+            # Simple, standard revenue calculation: $3.00 per unit distance of completed trips
+            revenue = sum(
+                (t.planned_distance * 3 for t in v.trips.filter(status=Trip.Status.COMPLETED)),
+                start=0
+            ) or 0
+            
             roi = ((revenue - op_cost) / v.acquisition_cost) if v.acquisition_cost else 0
             report.append(
                 {
