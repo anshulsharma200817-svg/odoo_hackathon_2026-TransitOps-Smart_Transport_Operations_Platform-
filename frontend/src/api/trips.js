@@ -173,7 +173,12 @@ export async function listTrips(filters = {}) {
 
 export async function createTrip(payload) {
   try {
-    const { data } = await client.post("/trips/", payload);
+    const apiPayload = {
+      ...payload,
+      vehicle: payload.vehicle || payload.vehicle_id,
+      driver: payload.driver || payload.driver_id,
+    };
+    const { data } = await client.post("/trips/", apiPayload);
     return (await enrichTrips([data]))[0] || data;
   } catch (error) {
     if (!backendUnreachable(error)) {
