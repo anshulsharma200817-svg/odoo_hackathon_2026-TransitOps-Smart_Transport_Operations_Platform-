@@ -91,6 +91,8 @@ All three devs need this before they can work in parallel. Dev A owns the models
 
 **⚠ Open blocker (found by Dev C during Hour 6 reconciliation):** `POST /api/auth/login/` currently returns only `{access, refresh}` — no `role`, even though this contract specifies `{access, refresh, role}`. `LoginView(TokenObtainPairView): pass` is an uncustomized passthrough, so it never includes role in the token response. Frontend already handles the missing role gracefully (sidebar just shows nothing instead of crashing), so this isn't blocking dev work, but it needs fixing before the demo since the role label is visible in the sidebar. Needs either a custom token serializer that adds `role` to the response, or the same via `/api/auth/refresh/` — Dev A's call on the cleanest way to do it.
 
+**✅ Login role blocker resolved (Dev B/Bhavya):** Added `CustomTokenObtainPairSerializer` (overrides `validate()` to set `data["role"] = self.user.role`) and pointed `LoginView.serializer_class` at it. Independently re-verified by Dev C, not just taken at face value: signed up a fresh account and logged in against the real backend both via a raw `curl` call and through the actual frontend login flow — the live `POST /api/auth/login/` response body genuinely includes `"role":"FLEET_MANAGER"` in both checks, and it persists correctly into the sidebar via `localStorage`.
+
 ### Hour 3 — Vehicle/Driver Serializers + ViewSets
 - [ ] Vehicle CRUD ViewSet + serializer
 - [ ] Driver CRUD ViewSet + serializer
