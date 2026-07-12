@@ -133,7 +133,7 @@ function VehicleForm({ initialValues, onSubmit, onCancel }) {
           Cancel
         </Button>
         <Button type="submit" loading={saving} className="bg-gradient-to-r from-brand-600 to-indigo-600 shadow-glow hover:shadow-glow-lg transition-all duration-300">
-          {saving ? "Saving…" : editing ? "Save Changes" : "Create Vehicle"}
+          {saving ? "Saving…" : initialValues ? "Save Changes" : "Create Vehicle"}
         </Button>
       </div>
     </form>
