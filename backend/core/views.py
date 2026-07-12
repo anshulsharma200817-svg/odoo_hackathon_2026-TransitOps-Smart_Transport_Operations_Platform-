@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Driver, Expense, FuelLog, MaintenanceLog, Trip, Vehicle
 from .serializers import (
+    CustomTokenObtainPairSerializer,
     DriverSerializer,
     ExpenseSerializer,
     FuelLogSerializer,
@@ -39,7 +40,7 @@ class SignupView(generics.CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
-    pass
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 # ---- Vehicles ------------------------------------------------------------
