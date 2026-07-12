@@ -23,6 +23,21 @@ export default {
       boxShadow: {
         card: "0 1px 2px 0 rgba(15, 23, 42, 0.04), 0 1px 3px 1px rgba(15, 23, 42, 0.06)",
       },
+      keyframes: {
+        "fade-in-up": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        blob: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "33%": { transform: "translate(24px, -32px) scale(1.08)" },
+          "66%": { transform: "translate(-18px, 14px) scale(0.94)" },
+        },
+      },
+      animation: {
+        "fade-in-up": "fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
+        blob: "blob 12s infinite ease-in-out",
+      },
     },
   },
   plugins: [],
