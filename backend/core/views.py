@@ -184,8 +184,9 @@ class ReportsView(APIView):
         report = []
         for v in Vehicle.objects.all():
             distance = sum(
-                (t.final_odometer or 0) for t in v.trips.filter(status=Trip.Status.COMPLETED)
-            )
+                (t.planned_distance for t in v.trips.filter(status=Trip.Status.COMPLETED)),
+                start=0
+            ) or 0
             fuel = sum((f.liters for f in v.fuel_logs.all()), start=0) or 0
             fuel_cost = sum((f.cost for f in v.fuel_logs.all()), start=0) or 0
             maintenance_cost = sum((m.cost for m in v.maintenance_logs.all()), start=0) or 0
@@ -195,7 +196,13 @@ class ReportsView(APIView):
             ) or 0
             op_cost = fuel_cost + maintenance_cost + other_expenses
             fuel_efficiency = (distance / fuel) if fuel else 0
-            revenue = 0  # plug in real revenue source if tracked
+            
+            # Simple, standard revenue calculation: $3.00 per unit distance of completed trips
+            revenue = sum(
+                (t.planned_distance * 3 for t in v.trips.filter(status=Trip.Status.COMPLETED)),
+                start=0
+            ) or 0
+            
             roi = ((revenue - op_cost) / v.acquisition_cost) if v.acquisition_cost else 0
             report.append(
                 {
