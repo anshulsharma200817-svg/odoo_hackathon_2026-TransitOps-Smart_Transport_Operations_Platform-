@@ -135,6 +135,77 @@ class TripEngineTests(TestCase):
         with self.assertRaises(ValueError):
             trip.dispatch()
 
+    def test_vehicle_in_shop_dispatch_prevention(self):
+        self.vehicle.status = Vehicle.Status.IN_SHOP
+        self.vehicle.save()
+
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.dispatch()
+
+    def test_driver_off_duty_dispatch_prevention(self):
+        self.driver.status = Driver.Status.OFF_DUTY
+        self.driver.save()
+
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.dispatch()
+
+    def test_dispatch_non_draft_prevention(self):
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.COMPLETED,
+        )
+        with self.assertRaises(ValueError):
+            trip.dispatch()
+
+    def test_complete_non_dispatched_prevention(self):
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.complete(final_odometer=12100.0, fuel_consumed=20.0)
+
+    def test_cancel_non_dispatched_prevention(self):
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.cancel()
+
 
 class ReportsViewTests(APITestCase):
     def setUp(self):
