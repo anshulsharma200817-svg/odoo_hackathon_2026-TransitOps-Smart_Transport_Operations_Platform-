@@ -103,6 +103,38 @@ class TripEngineTests(TestCase):
         with self.assertRaises(ValueError):
             trip.dispatch()
 
+    def test_busy_driver_prevention(self):
+        self.driver.status = Driver.Status.ON_TRIP
+        self.driver.save()
+
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.dispatch()
+
+    def test_suspended_driver_prevention(self):
+        self.driver.status = Driver.Status.SUSPENDED
+        self.driver.save()
+
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        with self.assertRaises(ValueError):
+            trip.dispatch()
+
 
 class ReportsViewTests(APITestCase):
     def setUp(self):
