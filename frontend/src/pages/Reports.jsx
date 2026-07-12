@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { useToast } from "../components/ui/ToastProvider";
-import { getReports, downloadReportsCsv, downloadReportsPdf } from "../api/reports";
+import { getReports, downloadReportsCsv } from "../api/reports";
 import { IconChart, IconTruck } from "../components/icons";
 
 export default function Reports() {
@@ -10,7 +10,6 @@ export default function Reports() {
   const [report, setReport] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const [exportingPdf, setExportingPdf] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -64,17 +63,7 @@ export default function Reports() {
     }
   }
 
-  async function handleExportPdf() {
-    setExportingPdf(true);
-    try {
-      await downloadReportsPdf();
-      showToast("Report exported as PDF");
-    } catch (err) {
-      showToast(err.message || "Could not export PDF", "error");
-    } finally {
-      setExportingPdf(false);
-    }
-  }
+
 
   return (
     <div className="min-h-full space-y-6 p-4 sm:p-8">
@@ -93,14 +82,7 @@ export default function Reports() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            onClick={handleExportPdf}
-            loading={exportingPdf}
-            variant="secondary"
-            className="flex items-center justify-center gap-2 border-slate-300 font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100/80"
-          >
-            {exportingPdf ? "Exporting…" : "Export PDF"}
-          </Button>
+
           <Button
             onClick={handleExport}
             loading={exporting}
