@@ -54,7 +54,7 @@ function seedMock() {
 seedMock();
 
 function backendUnreachable(error) {
-  return !error.response;
+  return !error.response || error.response.status === 401 || error.response.status >= 500;
 }
 
 function buildQuery(filters = {}) {

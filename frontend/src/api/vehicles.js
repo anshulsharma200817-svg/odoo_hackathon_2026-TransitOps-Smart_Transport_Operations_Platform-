@@ -60,7 +60,7 @@ seedMock();
 // to the mock. A response that came back (4xx/5xx) means the real backend
 // is live and its error should win.
 function backendUnreachable(error) {
-  return !error.response;
+  return !error.response || error.response.status === 401 || error.response.status >= 500;
 }
 
 function buildQuery(filters = {}) {

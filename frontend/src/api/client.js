@@ -10,4 +10,16 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("role");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default client;
