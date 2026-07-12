@@ -28,6 +28,7 @@ class SignupView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         from django.contrib.auth import get_user_model
+        import datetime
 
         User = get_user_model()
         user = User.objects.create_user(
@@ -36,6 +37,15 @@ class SignupView(generics.CreateAPIView):
             password=request.data["password"],
             role=request.data.get("role", User.Role.FLEET_MANAGER),
         )
+        if user.role == User.Role.DRIVER:
+            from .models import Driver
+            Driver.objects.create(
+                user=user,
+                name=user.email.split("@")[0].capitalize(),
+                license_number=f"PENDING-{user.id}",
+                license_category="PENDING",
+                license_expiry_date=datetime.date.today(),
+            )
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
@@ -74,6 +84,12 @@ class DriverViewSet(viewsets.ModelViewSet):
             license_expiry_date__gte=datetime.date.today(),
         )
         return Response(DriverSerializer(qs, many=True).data)
+
+    @action(detail=False, methods=["get"], url_path="me")
+    def me(self, request):
+        if not hasattr(request.user, "driver_profile") or not request.user.driver_profile:
+            return Response({"detail": "Driver profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(DriverSerializer(request.user.driver_profile).data)
 
 
 # ---- Trips -------------------------------------------------------------

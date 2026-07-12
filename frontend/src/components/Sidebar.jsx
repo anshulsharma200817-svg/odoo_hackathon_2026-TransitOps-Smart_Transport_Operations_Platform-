@@ -18,12 +18,13 @@ import {
 // logged-in user's role before rendering.
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard", roles: null, Icon: IconDashboard },
-  { label: "Vehicles", path: "/vehicles", roles: null, Icon: IconTruck },
-  { label: "Drivers", path: "/drivers", roles: null, Icon: IconUser },
-  { label: "Trips", path: "/trips", roles: null, Icon: IconRoute },
-  { label: "Maintenance", path: "/maintenance", roles: null, Icon: IconWrench },
+  { label: "My Profile", path: "/profile", roles: ["DRIVER"], Icon: IconUser },
+  { label: "Vehicles", path: "/vehicles", roles: ["FLEET_MANAGER"], Icon: IconTruck },
+  { label: "Drivers", path: "/drivers", roles: ["FLEET_MANAGER"], Icon: IconUser },
+  { label: "Trips", path: "/trips", roles: ["FLEET_MANAGER"], Icon: IconRoute },
+  { label: "Maintenance", path: "/maintenance", roles: ["FLEET_MANAGER"], Icon: IconWrench },
   { label: "Fuel & Expenses", path: "/fuel-expenses", roles: null, Icon: IconFuel },
-  { label: "Reports", path: "/reports", roles: null, Icon: IconChart },
+  { label: "Reports", path: "/reports", roles: ["FLEET_MANAGER"], Icon: IconChart },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
@@ -64,7 +65,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
           </button>
         </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter(item => !item.roles || item.roles.includes(role)).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

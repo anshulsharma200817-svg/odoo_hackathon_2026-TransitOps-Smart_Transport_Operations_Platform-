@@ -40,6 +40,7 @@ class Driver(models.Model):
         SUSPENDED = "SUSPENDED", "Suspended"
 
     name = models.CharField(max_length=128)
+    user = models.OneToOneField('User', on_delete=models.SET_NULL, null=True, blank=True, related_name="driver_profile")
     license_number = models.CharField(max_length=64, unique=True)
     license_category = models.CharField(max_length=32)
     license_expiry_date = models.DateField()

@@ -11,6 +11,7 @@ import Trips from "./pages/Trips";
 import Maintenance from "./pages/Maintenance";
 import FuelExpenses from "./pages/FuelExpenses";
 import Reports from "./pages/Reports";
+import DriverProfile from "./pages/DriverProfile";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/fuel-expenses" element={<FuelExpenses />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/profile" element={<DriverProfile />} />
           </Route>
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

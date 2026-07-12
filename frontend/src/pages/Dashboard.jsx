@@ -37,7 +37,15 @@ const EMPTY_SUMMARY = {
   fleet_utilization_pct: 0,
 };
 
+import { getRole } from "../api/auth";
+import DriverDashboard from "./DriverDashboard";
+
 export default function Dashboard() {
+  const role = getRole();
+  if (role === "DRIVER") {
+    return <DriverDashboard />;
+  }
+
   const [vehicles, setVehicles] = useState([]);
   const [trips, setTrips] = useState([]);
   const [summary, setSummary] = useState(EMPTY_SUMMARY);
