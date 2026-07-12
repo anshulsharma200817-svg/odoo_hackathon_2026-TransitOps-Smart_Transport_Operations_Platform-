@@ -225,7 +225,7 @@ export default function Vehicles() {
   return (
     <div className="min-h-full space-y-8 p-4 sm:p-8">
       {/* Top Header with Gradient Accent */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 text-white shadow-glow">
@@ -346,7 +346,7 @@ export default function Vehicles() {
       </div>
 
       {/* Control Bar: Filters & View Switcher */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-[200px] flex-1 sm:flex-initial">
             <Input

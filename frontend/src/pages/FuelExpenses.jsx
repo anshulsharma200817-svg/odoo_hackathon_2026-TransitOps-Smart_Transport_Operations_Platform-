@@ -344,7 +344,7 @@ export default function FuelExpenses() {
   return (
     <div className="min-h-full space-y-8 p-4 sm:p-8 animate-fade-in">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-glow">
@@ -410,9 +410,9 @@ export default function FuelExpenses() {
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-teal-700">Cumulative Fuel Spend</span>
-            <span className="rounded-md bg-teal-50 px-2 py-0.5 text-xs font-bold text-teal-600">
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate text-xs font-bold uppercase tracking-wider text-teal-700">Cumulative Fuel Spend</span>
+            <span className="shrink-0 rounded-md bg-teal-50 px-2 py-0.5 text-xs font-bold text-teal-600">
               Cost
             </span>
           </div>
@@ -452,7 +452,7 @@ export default function FuelExpenses() {
       </div>
 
       {/* Tab Selector & Filters Bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200/60">
           <button
             onClick={() => {
