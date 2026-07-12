@@ -196,3 +196,32 @@ class ReportsViewTests(APITestCase):
         self.assertEqual(data["operational_cost"], 128.25)
         self.assertEqual(data["roi"], 0.0069)
 
+    def test_reports_csv_export(self):
+        # Create a completed trip
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        trip.dispatch()
+        trip.complete(final_odometer=12100.0, fuel_consumed=20.0)
+
+        # Log fuel cost: 65.50
+        FuelLog.objects.create(
+            vehicle=self.vehicle,
+            liters=20.0,
+            cost=65.50,
+            date=datetime.date.today(),
+        )
+
+        url = reverse("reports-csv")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        self.assertIn(b"Vehicle,Fuel Efficiency,Operational Cost,ROI", response.content)
+        self.assertIn(b"VAN-05", response.content)
+
