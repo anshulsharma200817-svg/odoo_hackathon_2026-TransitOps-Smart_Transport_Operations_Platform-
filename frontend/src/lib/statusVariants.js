@@ -14,3 +14,11 @@ export const DRIVER_STATUS_VARIANTS = {
   "Off Duty": "gray",
   Suspended: "red",
 };
+
+export const TRIP_STATUS_VARIANTS = {
+  Draft: "amber",
+  Dispatched: "blue",
+  Completed: "green",
+  Cancelled: "red",
+};
+
