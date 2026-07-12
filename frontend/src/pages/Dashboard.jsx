@@ -12,11 +12,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { listVehicles } from "../api/vehicles";
-import { listDrivers } from "../api/drivers";
 import { listTrips } from "../api/trips";
+import { getDashboardSummary } from "../api/dashboard";
 import Badge from "../components/ui/Badge";
 import { TRIP_STATUS_VARIANTS } from "../lib/statusVariants";
-import { VEHICLE_STATUS, TRIP_STATUS, statusLabel } from "../lib/enumLabels";
+import { VEHICLE_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconRoute, IconTruck, IconUser, IconWrench } from "../components/icons";
 
 const STATUS_COLORS = {
@@ -26,35 +26,35 @@ const STATUS_COLORS = {
   [VEHICLE_STATUS.RETIRED]: "#64748b", // slate
 };
 
-const WEEKLY_TREND = [
-  { day: "Mon", trips: 12, fuel: 340 },
-  { day: "Tue", trips: 16, fuel: 410 },
-  { day: "Wed", trips: 14, fuel: 390 },
-  { day: "Thu", trips: 19, fuel: 520 },
-  { day: "Fri", trips: 22, fuel: 610 },
-  { day: "Sat", trips: 15, fuel: 430 },
-  { day: "Sun", trips: 9, fuel: 240 },
-];
+const EMPTY_SUMMARY = {
+  active_vehicles: 0,
+  available_vehicles: 0,
+  vehicles_in_maintenance: 0,
+  active_trips: 0,
+  pending_trips: 0,
+  drivers_on_duty: 0,
+  fleet_utilization_pct: 0,
+};
 
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
-  const [drivers, setDrivers] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     async function loadData() {
       try {
-        const [vList, dList, tList] = await Promise.all([
+        const [vList, tList, dashboardSummary] = await Promise.all([
           listVehicles().catch(() => []),
-          listDrivers().catch(() => []),
           listTrips().catch(() => []),
+          getDashboardSummary().catch(() => EMPTY_SUMMARY),
         ]);
         if (mounted) {
           setVehicles(vList || []);
-          setDrivers(dList || []);
           setTrips(tList || []);
+          setSummary(dashboardSummary || EMPTY_SUMMARY);
         }
       } finally {
         if (mounted) setLoading(false);
@@ -66,28 +66,44 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Fleet Counts
+  // Fleet Status donut: /dashboard/ deliberately excludes Retired vehicles
+  // from its counts, so this still needs the raw vehicle list.
   const totalVehicles = vehicles.length;
   const availableCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.AVAILABLE).length;
   const onTripCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.ON_TRIP).length;
   const inShopCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.IN_SHOP).length;
   const retiredCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.RETIRED).length;
 
-  const activeTripsCount = trips.filter((t) => t.status === TRIP_STATUS.DISPATCHED).length;
-
-  const avgSafetyScore = drivers.length
-    ? Math.round(
-        drivers.reduce((acc, d) => acc + (Number(d.safety_score) || 0), 0) / drivers.length
-      )
-    : 0;
-
-  // Donut chart data
   const pieData = [
     { name: statusLabel(VEHICLE_STATUS.AVAILABLE), value: availableCount, color: STATUS_COLORS[VEHICLE_STATUS.AVAILABLE] },
     { name: statusLabel(VEHICLE_STATUS.ON_TRIP), value: onTripCount, color: STATUS_COLORS[VEHICLE_STATUS.ON_TRIP] },
     { name: statusLabel(VEHICLE_STATUS.IN_SHOP), value: inShopCount, color: STATUS_COLORS[VEHICLE_STATUS.IN_SHOP] },
     { name: statusLabel(VEHICLE_STATUS.RETIRED), value: retiredCount, color: STATUS_COLORS[VEHICLE_STATUS.RETIRED] },
   ].filter((item) => item.value > 0);
+
+  // Weekly Operations chart: no server endpoint for this, so it's computed
+  // from real trip data (created_at) rather than hardcoded placeholder
+  // numbers. The Trip model only has created_at, not per-transition
+  // timestamps, so both series bucket on that single date.
+  const weeklyTrend = useMemo(() => {
+    const days = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      days.push(d);
+    }
+    return days.map((d) => {
+      const key = d.toISOString().split("T")[0];
+      const dayTrips = trips.filter((t) => (t.created_at || "").slice(0, 10) === key);
+      const fuel = dayTrips.reduce((acc, t) => acc + (Number(t.fuel_consumed) || 0), 0);
+      return {
+        day: d.toLocaleDateString("en-US", { weekday: "short" }),
+        trips: dayTrips.length,
+        fuel,
+      };
+    });
+  }, [trips]);
 
   const userEmail = localStorage.getItem("user_email") || "Admin";
   const userName = userEmail.split("@")[0];
@@ -130,7 +146,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 2. Easy-to-Understand Summary Cards (Clean & Uncluttered) */}
+      {/* 2. KPI cards - sourced from the real /dashboard/ endpoint, covering
+          all 7 contract metrics (Active/Available Vehicles, In Maintenance,
+          Active/Pending Trips, Drivers On Duty, Fleet Utilization %) across
+          4 cards via subtext, instead of 7 separate tiles. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Available Vehicles */}
         <Link
@@ -146,8 +165,8 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-900">{availableCount}</span>
-            <span className="text-sm font-semibold text-slate-500">/ {totalVehicles} vehicles</span>
+            <span className="text-3xl font-extrabold text-slate-900">{summary.available_vehicles}</span>
+            <span className="text-sm font-semibold text-slate-500">/ {summary.active_vehicles} active</span>
           </div>
           <p className="mt-2 text-xs font-medium text-emerald-600 flex items-center justify-between border-t border-slate-100 pt-3">
             <span>Available in yards</span>
@@ -169,11 +188,11 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-900">{activeTripsCount}</span>
+            <span className="text-3xl font-extrabold text-slate-900">{summary.active_trips}</span>
             <span className="text-sm font-semibold text-blue-600">dispatched trips</span>
           </div>
           <p className="mt-2 text-xs font-medium text-blue-600 flex items-center justify-between border-t border-slate-100 pt-3">
-            <span>Currently in transit</span>
+            <span>{summary.pending_trips} pending dispatch</span>
             <span className="font-bold">→</span>
           </p>
         </Link>
@@ -192,7 +211,7 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-900">{inShopCount}</span>
+            <span className="text-3xl font-extrabold text-slate-900">{summary.vehicles_in_maintenance}</span>
             <span className="text-sm font-semibold text-slate-500">vehicles</span>
           </div>
           <p className="mt-2 text-xs font-medium text-amber-600 flex items-center justify-between border-t border-slate-100 pt-3">
@@ -201,25 +220,25 @@ export default function Dashboard() {
           </p>
         </Link>
 
-        {/* Card 4: Driver Safety Index */}
+        {/* Card 4: Fleet Utilization % */}
         <Link
           to="/drivers"
           className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card transition-all hover:-translate-y-1 hover:border-purple-300 hover:shadow-lg flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Fleet Safety Rating
+              Fleet Utilization
             </span>
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
               <IconUser className="h-5 w-5" />
             </span>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-900">{avgSafetyScore}</span>
-            <span className="text-sm font-semibold text-slate-500">/ 100</span>
+            <span className="text-3xl font-extrabold text-slate-900">{summary.fleet_utilization_pct}</span>
+            <span className="text-sm font-semibold text-slate-500">%</span>
           </div>
           <p className="mt-2 text-xs font-medium text-purple-600 flex items-center justify-between border-t border-slate-100 pt-3">
-            <span>{drivers.length} drivers on roster</span>
+            <span>{summary.drivers_on_duty} drivers on duty</span>
             <span className="font-bold">→</span>
           </p>
         </Link>
@@ -235,22 +254,22 @@ export default function Dashboard() {
                 Weekly Operations Overview
               </h3>
               <p className="text-xs text-slate-500">
-                Number of trips dispatched vs. fuel consumed each day
+                Trips logged vs. fuel consumed, last 7 days
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs font-semibold">
               <span className="flex items-center gap-1.5 text-brand-600">
-                <span className="h-2.5 w-2.5 rounded-full bg-brand-500" /> Trips Dispatched
+                <span className="h-2.5 w-2.5 rounded-full bg-brand-500" /> Trips Logged
               </span>
               <span className="flex items-center gap-1.5 text-emerald-600">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Fuel (Liters / 10)
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Fuel (Liters)
               </span>
             </div>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={WEEKLY_TREND} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={weeklyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="tripsGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
