@@ -43,11 +43,21 @@ export default {
           "0%": { backgroundPosition: "0 0" },
           "100%": { backgroundPosition: "0 -480px" },
         },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
       },
       animation: {
         "fade-in-up": "fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
         blob: "blob 12s infinite ease-in-out",
         drift: "drift 14s linear infinite",
+        "fade-in": "fade-in 0.2s ease-out both",
+        "slide-in-right": "slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },
