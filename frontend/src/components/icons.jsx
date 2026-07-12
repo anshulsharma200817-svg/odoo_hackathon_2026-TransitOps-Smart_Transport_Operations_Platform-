@@ -2,28 +2,7 @@
 // brand marks share one visual language instead of borrowing random icon packs.
 
 export function Logo({ className = "h-8 w-8" }) {
-  return (
-    <svg viewBox="0 0 32 32" fill="none" className={className}>
-      <defs>
-        <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#818cf8" />
-          <stop offset="1" stopColor="#4f46e5" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="9" fill="url(#logo-grad)" />
-      <path
-        d="M8 20.5c2-5 4-9 8-9s6 4 8 9"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.9"
-      />
-      <circle cx="8" cy="21.5" r="1.6" fill="white" />
-      <circle cx="24" cy="21.5" r="1.6" fill="white" />
-      <circle cx="16" cy="11.5" r="1.6" fill="white" />
-    </svg>
-  );
+  return <img src="/favicon.svg" alt="TransitOps" className={className} />;
 }
 
 const strokeProps = {
