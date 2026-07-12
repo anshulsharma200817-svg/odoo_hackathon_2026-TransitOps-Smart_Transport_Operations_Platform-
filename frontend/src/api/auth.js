@@ -17,11 +17,8 @@ function writeMockUsers(users) {
   localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(users));
 }
 
-// Seed one demo account so login can be exercised before signup/backend exist.
 function seedDemoUser() {
-  if (readMockUsers().length === 0) {
-    writeMockUsers([{ email: "admin@transitops.dev", password: "password123", role: ROLE.FLEET_MANAGER }]);
-  }
+  localStorage.removeItem("mock_users");
 }
 seedDemoUser();
 

@@ -20,45 +20,7 @@ function writeMock(trips) {
 }
 
 function seedMock() {
-  if (readMock().length === 0) {
-    writeMock([
-      {
-        id: "t-1",
-        source: "Mumbai Central Depot",
-        destination: "Pune Logistics Hub",
-        vehicle_id: "v-1",
-        driver_id: "d-1",
-        cargo_weight: 350,
-        planned_distance: 150,
-        status: TRIP_STATUS.DRAFT,
-        created_at: "2026-07-12",
-        vehicle_display: "VAN-05 (Tata Ace)",
-        vehicle_registration_number: "VAN-05",
-        vehicle_max_load_capacity: 500,
-        driver_display: "Alex Carter",
-        driver_name: "Alex Carter",
-      },
-      {
-        id: "t-2",
-        source: "Delhi North Yard",
-        destination: "Jaipur Express Depot",
-        vehicle_id: "v-1",
-        driver_id: "d-1",
-        cargo_weight: 420,
-        planned_distance: 280,
-        status: TRIP_STATUS.COMPLETED,
-        created_at: "2026-07-10",
-        completed_at: "2026-07-11T14:30:00.000Z",
-        final_odometer: 11950,
-        fuel_consumed: 35,
-        vehicle_display: "VAN-05 (Tata Ace)",
-        vehicle_registration_number: "VAN-05",
-        vehicle_max_load_capacity: 500,
-        driver_display: "Alex Carter",
-        driver_name: "Alex Carter",
-      },
-    ]);
-  }
+  localStorage.removeItem(MOCK_KEY);
 }
 seedMock();
 

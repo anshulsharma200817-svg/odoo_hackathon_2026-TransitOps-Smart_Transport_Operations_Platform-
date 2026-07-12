@@ -18,43 +18,7 @@ export function writeMock(vehicles) {
 }
 
 function seedMock() {
-  if (readMock().length === 0) {
-    writeMock([
-      {
-        id: "v-1",
-        registration_number: "VAN-05",
-        name_model: "Tata Ace",
-        type: "Van",
-        max_load_capacity: 500,
-        odometer: 12000,
-        acquisition_cost: 850000,
-        status: VEHICLE_STATUS.AVAILABLE,
-        region: "North",
-      },
-      {
-        id: "v-2",
-        registration_number: "TRK-12",
-        name_model: "Ashok Leyland Dost",
-        type: "Truck",
-        max_load_capacity: 5000,
-        odometer: 45210,
-        acquisition_cost: 2200000,
-        status: VEHICLE_STATUS.IN_SHOP,
-        region: "West",
-      },
-      {
-        id: "v-3",
-        registration_number: "TRL-09",
-        name_model: "Eicher Trailer",
-        type: "Trailer",
-        max_load_capacity: 12000,
-        odometer: 8100,
-        acquisition_cost: 3100000,
-        status: VEHICLE_STATUS.RETIRED,
-        region: "South",
-      },
-    ]);
-  }
+  localStorage.removeItem(MOCK_KEY);
 }
 seedMock();
 

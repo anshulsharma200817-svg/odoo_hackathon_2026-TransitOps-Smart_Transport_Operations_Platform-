@@ -35,55 +35,8 @@ function writeExpenseMock(expenses) {
 }
 
 function seedMocks() {
-  if (readFuelMock().length === 0) {
-    writeFuelMock([
-      {
-        id: "f-1",
-        vehicle: "v-1",
-        vehicle_display: "VAN-05 (Tata Ace)",
-        liters: 42.5,
-        cost: 4165,
-        date: "2026-07-10",
-      },
-      {
-        id: "f-2",
-        vehicle: "v-2",
-        vehicle_display: "TRK-12 (Ashok Leyland Dost)",
-        liters: 120.0,
-        cost: 11760,
-        date: "2026-07-11",
-      },
-    ]);
-  }
-
-  if (readExpenseMock().length === 0) {
-    writeExpenseMock([
-      {
-        id: "e-1",
-        vehicle: "v-1",
-        vehicle_display: "VAN-05 (Tata Ace)",
-        type: "TOLL",
-        amount: 850,
-        date: "2026-07-10",
-      },
-      {
-        id: "e-2",
-        vehicle: "v-2",
-        vehicle_display: "TRK-12 (Ashok Leyland Dost)",
-        type: "MAINTENANCE",
-        amount: 4500,
-        date: "2026-07-11",
-      },
-      {
-        id: "e-3",
-        vehicle: "v-1",
-        vehicle_display: "VAN-05 (Tata Ace)",
-        type: "OTHER",
-        amount: 1200,
-        date: "2026-07-11",
-      },
-    ]);
-  }
+  localStorage.removeItem(FUEL_MOCK_KEY);
+  localStorage.removeItem(EXPENSE_MOCK_KEY);
 }
 seedMocks();
 

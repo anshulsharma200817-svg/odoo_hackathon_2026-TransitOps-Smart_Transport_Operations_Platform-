@@ -17,30 +17,7 @@ function writeMock(logs) {
 }
 
 function seedMock() {
-  if (readMock().length === 0) {
-    writeMock([
-      {
-        id: "m-1",
-        vehicle: "v-2",
-        vehicle_display: "TRK-12 (Ashok Leyland Dost)",
-        description: "Brake pad replacement and hydraulic line inspection",
-        cost: 4500,
-        date_opened: new Date().toISOString().split("T")[0],
-        date_closed: null,
-        status: MAINTENANCE_STATUS.OPEN,
-      },
-      {
-        id: "m-2",
-        vehicle: "v-1",
-        vehicle_display: "VAN-05 (Tata Ace)",
-        description: "Routine 10,000 km oil change and wheel alignment",
-        cost: 2100,
-        date_opened: "2026-07-01",
-        date_closed: "2026-07-03",
-        status: MAINTENANCE_STATUS.CLOSED,
-      },
-    ]);
-  }
+  localStorage.removeItem(MOCK_KEY);
 }
 seedMock();
 

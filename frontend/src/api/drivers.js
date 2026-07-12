@@ -18,40 +18,7 @@ function writeMock(drivers) {
 }
 
 function seedMock() {
-  if (readMock().length === 0) {
-    writeMock([
-      {
-        id: "d-1",
-        name: "Alex Carter",
-        license_number: "DL-88213",
-        license_category: "LMV",
-        license_expiry_date: "2027-04-01",
-        contact_number: "9876543210",
-        safety_score: 92,
-        status: DRIVER_STATUS.AVAILABLE,
-      },
-      {
-        id: "d-2",
-        name: "Priya Nair",
-        license_number: "DL-77012",
-        license_category: "HMV",
-        license_expiry_date: "2024-01-15",
-        contact_number: "9123456780",
-        safety_score: 78,
-        status: DRIVER_STATUS.OFF_DUTY,
-      },
-      {
-        id: "d-3",
-        name: "Sam Wu",
-        license_number: "DL-45590",
-        license_category: "HMV",
-        license_expiry_date: "2026-11-20",
-        contact_number: "9988776655",
-        safety_score: 65,
-        status: DRIVER_STATUS.SUSPENDED,
-      },
-    ]);
-  }
+  localStorage.removeItem(MOCK_KEY);
 }
 seedMock();
 
