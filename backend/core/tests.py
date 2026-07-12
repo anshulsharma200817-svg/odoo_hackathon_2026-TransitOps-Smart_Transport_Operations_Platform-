@@ -714,3 +714,128 @@ class ReportsEdgeCaseTests(APITestCase):
         self.assertAlmostEqual(float(parts[1]), json_row["fuel_efficiency"], places=2)
         self.assertAlmostEqual(float(parts[2]), json_row["operational_cost"], places=2)
         self.assertAlmostEqual(float(parts[3]), json_row["roi"], places=4)
+
+
+# ---------------------------------------------------------------------------
+# Hour 6 — List Filters edge-case tests
+# ---------------------------------------------------------------------------
+
+class Hour6FilterTests(APITestCase):
+    def setUp(self):
+        user = User.objects.create_user(
+            username="filtertest@test.com", email="filtertest@test.com",
+            password="pass", role=User.Role.FLEET_MANAGER,
+        )
+        self.client.force_authenticate(user=user)
+
+        self.v1 = Vehicle.objects.create(
+            registration_number="V-1", name_model="Model-1", type="Van",
+            max_load_capacity=1000, odometer=0, acquisition_cost=50000,
+            status=Vehicle.Status.AVAILABLE,
+        )
+        self.v2 = Vehicle.objects.create(
+            registration_number="V-2", name_model="Model-2", type="Truck",
+            max_load_capacity=2000, odometer=0, acquisition_cost=80000,
+            status=Vehicle.Status.AVAILABLE,
+        )
+
+    # -- MaintenanceLog Filters --
+    def test_maintenance_filter_by_vehicle(self):
+        m1 = MaintenanceLog.objects.create(vehicle=self.v1, description="Fix 1", cost=10)
+        m2 = MaintenanceLog.objects.create(vehicle=self.v2, description="Fix 2", cost=20)
+        
+        r = self.client.get(f"/api/maintenance/?vehicle={self.v1.id}")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], m1.id)
+
+    def test_maintenance_filter_by_status(self):
+        m1 = MaintenanceLog.objects.create(vehicle=self.v1, description="Fix 1", cost=10)
+        m2 = MaintenanceLog.objects.create(vehicle=self.v2, description="Fix 2", cost=20)
+        m1.close()  # m1 is CLOSED, m2 is OPEN
+        
+        r = self.client.get("/api/maintenance/?status=OPEN")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], m2.id)
+
+    def test_maintenance_combined_filter(self):
+        m1 = MaintenanceLog.objects.create(vehicle=self.v1, description="Fix 1", cost=10)
+        m2 = MaintenanceLog.objects.create(vehicle=self.v1, description="Fix 2", cost=20)
+        m3 = MaintenanceLog.objects.create(vehicle=self.v2, description="Fix 3", cost=30)
+        m1.close()
+        
+        r = self.client.get(f"/api/maintenance/?vehicle={self.v1.id}&status=OPEN")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], m2.id)
+
+    def test_maintenance_no_match(self):
+        m1 = MaintenanceLog.objects.create(vehicle=self.v1, description="Fix 1", cost=10)
+        r = self.client.get("/api/maintenance/?status=CLOSED")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 0)
+
+    # -- FuelLog Filters --
+    def test_fuel_log_filter_by_vehicle(self):
+        f1 = FuelLog.objects.create(vehicle=self.v1, liters=10, cost=50, date="2026-07-12")
+        f2 = FuelLog.objects.create(vehicle=self.v2, liters=20, cost=100, date="2026-07-12")
+        
+        r = self.client.get(f"/api/fuel-logs/?vehicle={self.v1.id}")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], f1.id)
+
+    def test_fuel_log_filter_by_date(self):
+        f1 = FuelLog.objects.create(vehicle=self.v1, liters=10, cost=50, date="2026-07-11")
+        f2 = FuelLog.objects.create(vehicle=self.v2, liters=20, cost=100, date="2026-07-12")
+        
+        r = self.client.get("/api/fuel-logs/?date=2026-07-12")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], f2.id)
+
+    def test_fuel_log_combined_filter(self):
+        f1 = FuelLog.objects.create(vehicle=self.v1, liters=10, cost=50, date="2026-07-11")
+        f2 = FuelLog.objects.create(vehicle=self.v1, liters=20, cost=100, date="2026-07-12")
+        f3 = FuelLog.objects.create(vehicle=self.v2, liters=30, cost=150, date="2026-07-12")
+        
+        r = self.client.get(f"/api/fuel-logs/?vehicle={self.v1.id}&date=2026-07-12")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], f2.id)
+
+    # -- Expense Filters --
+    def test_expense_filter_by_vehicle(self):
+        e1 = Expense.objects.create(vehicle=self.v1, type=Expense.Type.TOLL, amount=10, date="2026-07-12")
+        e2 = Expense.objects.create(vehicle=self.v2, type=Expense.Type.OTHER, amount=20, date="2026-07-12")
+        
+        r = self.client.get(f"/api/expenses/?vehicle={self.v1.id}")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], e1.id)
+
+    def test_expense_filter_by_type(self):
+        e1 = Expense.objects.create(vehicle=self.v1, type=Expense.Type.TOLL, amount=10, date="2026-07-12")
+        e2 = Expense.objects.create(vehicle=self.v2, type=Expense.Type.OTHER, amount=20, date="2026-07-12")
+        
+        r = self.client.get("/api/expenses/?type=TOLL")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], e1.id)
+
+    def test_expense_combined_filter(self):
+        e1 = Expense.objects.create(vehicle=self.v1, type=Expense.Type.TOLL, amount=10, date="2026-07-12")
+        e2 = Expense.objects.create(vehicle=self.v1, type=Expense.Type.OTHER, amount=20, date="2026-07-12")
+        e3 = Expense.objects.create(vehicle=self.v2, type=Expense.Type.TOLL, amount=30, date="2026-07-12")
+        
+        r = self.client.get(f"/api/expenses/?vehicle={self.v1.id}&type=TOLL")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], e1.id)
+
+    def test_expense_no_match(self):
+        e1 = Expense.objects.create(vehicle=self.v1, type=Expense.Type.TOLL, amount=10, date="2026-07-12")
+        r = self.client.get("/api/expenses/?type=MAINTENANCE")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.data), 0)
