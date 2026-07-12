@@ -114,7 +114,7 @@ export default function Reports() {
       </div>
 
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-800">
-        Note: ROI assumes placeholder revenue ($3.00 per km of completed trip distance) since
+        Note: ROI assumes placeholder revenue (₹3.00 per km of completed trip distance) since
         real revenue tracking isn&apos;t wired up yet — expect low or negative values across the
         board until that lands. See the dev plan&apos;s open blocker for details.
       </div>

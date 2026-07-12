@@ -44,7 +44,7 @@ function computeMockReport() {
 
     const opCost = fuelCost + maintenanceCost + otherExpenses;
     const fuelEfficiency = fuel ? distance / fuel : 0;
-    // Same placeholder revenue model as the backend: $3.00 per unit distance
+    // Same placeholder revenue model as the backend: ₹3.00 per unit distance
     // of completed trips, pending the real revenue-tracking blocker.
     const revenue = vTrips.reduce((acc, t) => acc + (Number(t.planned_distance) || 0) * 3, 0);
     const roi = v.acquisition_cost ? (revenue - opCost) / v.acquisition_cost : 0;

@@ -228,7 +228,7 @@ class ReportsView(APIView):
             op_cost = fuel_cost + maintenance_cost + other_expenses
             fuel_efficiency = (distance / fuel) if fuel else 0
             
-            # Simple, standard revenue calculation: $3.00 per unit distance of completed trips
+            # Simple, standard revenue calculation: ₹3.00 per unit distance of completed trips
             revenue = sum(
                 (t.planned_distance * 3 for t in v.trips.filter(status=Trip.Status.COMPLETED)),
                 start=0

@@ -169,7 +169,7 @@ All three devs need this before they can work in parallel. Dev A owns the models
 
 **⚠ Decision log (done in Hour 3, ahead of schedule):** Operational Cost now includes non-MAINTENANCE-type `Expense` amounts (tolls, misc costs) on top of Fuel + Maintenance, rather than the spec's literal `Fuel + Maintenance` only. MAINTENANCE-type Expense entries are excluded to avoid double-counting against `MaintenanceLog.cost`. Verified against Van-05: `65.50 (fuel) + 12.75 (toll) + 50 (maintenance) = 128.25`. Flagged to Dev A/Dev C — revisit if the team wants strict spec compliance instead.
 
-**✅ Revenue blocker resolved (Hour 5):** Dev A merged a fix — revenue is now computed as `planned_distance × $3.00` per completed trip. ROI is now meaningful. VAN-05 live output: `operational_cost: 128.25`, `roi: -0.0051` (negative until trips complete and revenue accumulates). Live-verified via `/api/reports/` and `/api/reports/export/csv/` — both endpoints confirmed working.
+**✅ Revenue blocker resolved (Hour 5):** Dev A merged a fix — revenue is now computed as `planned_distance × ₹3.00` per completed trip. ROI is now meaningful. VAN-05 live output: `operational_cost: 128.25`, `roi: -0.0051` (negative until trips complete and revenue accumulates). Live-verified via `/api/reports/` and `/api/reports/export/csv/` — both endpoints confirmed working.
 ### Hours 6-8 — Filters, Bug Fixes, Support
 - [x] Add filters (vehicle type, status, region) to list endpoints where missing
 - [x] Help Dev C wire up chart data (utilization bar, cost line chart) — make sure `/api/dashboard/` and `/api/reports/` shapes are chart-friendly
