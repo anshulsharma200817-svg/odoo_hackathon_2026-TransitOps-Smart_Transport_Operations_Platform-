@@ -19,5 +19,6 @@ urlpatterns = [
     path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("reports/", views.ReportsView.as_view(), name="reports"),
     path("reports/export/csv/", views.ReportsCSVExportView.as_view(), name="reports-csv"),
+    path("reports/export/pdf/", views.ReportsPDFExportView.as_view(), name="reports-pdf"),
     path("", include(router.urls)),
 ]
