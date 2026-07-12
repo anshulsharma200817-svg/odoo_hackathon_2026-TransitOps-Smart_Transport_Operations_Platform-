@@ -129,14 +129,14 @@ All three devs need this before they can work in parallel. Dev A owns the models
 ### Hour 1 — API Contract + Stubs
 - [x] Lock the shared API contract above with Dev A and Dev C
 - [x] Stub empty endpoints (`/api/maintenance/`, `/api/fuel-logs/`, `/api/expenses/`, `/api/dashboard/`, `/api/reports/`) returning mock JSON so Dev C isn't blocked
-- [ ] **Push**
+- [x] **Push**
 
 ### Hour 2 — Maintenance
-- [ ] `MaintenanceLog` model: `vehicle` (FK), `description`, `date_opened`, `date_closed`, `status` (Open/Closed)
-- [ ] `enter_maintenance()` — creating an active record sets vehicle.status → In Shop, removes it from dispatch pool automatically
-- [ ] `close_maintenance()` — sets vehicle.status → Available, **unless** vehicle.status was already Retired (then leave it Retired)
-- [ ] Endpoints: `POST /api/maintenance/`, `POST /api/maintenance/{id}/close/`
-- [ ] **Push**
+- [x] `MaintenanceLog` model: `vehicle` (FK), `description`, `date_opened`, `date_closed`, `status` (Open/Closed)
+- [x] `enter_maintenance()` — creating an active record sets vehicle.status → In Shop, removes it from dispatch pool automatically
+- [x] `close_maintenance()` — sets vehicle.status → Available, **unless** vehicle.status was already Retired (then leave it Retired)
+- [x] Endpoints: `POST /api/maintenance/`, `POST /api/maintenance/{id}/close/`
+- [x] **Push**
 
 ### Hour 3 — Fuel & Expense
 - [ ] `FuelLog` model: `vehicle` (FK), `liters`, `cost`, `date`
