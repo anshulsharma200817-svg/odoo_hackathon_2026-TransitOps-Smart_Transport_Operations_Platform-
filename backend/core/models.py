@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 
 
 class User(AbstractUser):
@@ -70,6 +70,7 @@ class Trip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # --- Rule engine -------------------------------------------------
+    @transaction.atomic
     def dispatch(self):
         import datetime
         if self.status != Trip.Status.DRAFT:
@@ -90,18 +91,32 @@ class Trip(models.Model):
         self.driver.save()
         self.save()
 
+    @transaction.atomic
     def complete(self, final_odometer, fuel_consumed):
+        from decimal import Decimal
         if self.status != Trip.Status.DISPATCHED:
             raise ValueError("Only Dispatched trips can be completed.")
-        self.final_odometer = final_odometer
-        self.fuel_consumed = fuel_consumed
+        
+        # Convert final_odometer to Decimal to ensure safe comparison
+        dec_final_odometer = Decimal(str(final_odometer))
+        if dec_final_odometer < self.vehicle.odometer:
+            raise ValueError(f"Final odometer ({dec_final_odometer}) cannot be less than the starting odometer ({self.vehicle.odometer}).")
+        
+        self.final_odometer = dec_final_odometer
+        self.fuel_consumed = Decimal(str(fuel_consumed))
         self.status = Trip.Status.COMPLETED
+        
+        # Update vehicle status AND odometer
         self.vehicle.status = Vehicle.Status.AVAILABLE
+        self.vehicle.odometer = dec_final_odometer
+        
         self.driver.status = Driver.Status.AVAILABLE
+        
         self.vehicle.save()
         self.driver.save()
         self.save()
 
+    @transaction.atomic
     def cancel(self):
         if self.status != Trip.Status.DISPATCHED:
             raise ValueError("Only Dispatched trips can be cancelled.")
@@ -111,6 +126,7 @@ class Trip(models.Model):
         self.vehicle.save()
         self.driver.save()
         self.save()
+
 
 
 class MaintenanceLog(models.Model):
@@ -125,6 +141,7 @@ class MaintenanceLog(models.Model):
     date_closed = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.OPEN)
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         creating = self._state.adding
         if creating and self.vehicle.status == Vehicle.Status.RETIRED:
@@ -134,6 +151,7 @@ class MaintenanceLog(models.Model):
             self.vehicle.status = Vehicle.Status.IN_SHOP
             self.vehicle.save()
 
+    @transaction.atomic
     def close(self):
         import datetime
         self.status = MaintenanceLog.Status.CLOSED
@@ -142,6 +160,7 @@ class MaintenanceLog(models.Model):
             self.vehicle.status = Vehicle.Status.AVAILABLE
             self.vehicle.save()
         self.save()
+
 
 
 class FuelLog(models.Model):

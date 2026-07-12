@@ -405,6 +405,39 @@ class TripEngineTests(TestCase):
         with self.assertRaises(ValueError):
             trip.cancel()
 
+    def test_complete_odometer_rollback_prevention(self):
+        self.vehicle.odometer = 12000.0
+        self.vehicle.save()
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        trip.dispatch()
+        with self.assertRaises(ValueError):
+            trip.complete(final_odometer=11900.0, fuel_consumed=20.0)
+
+    def test_complete_updates_vehicle_odometer(self):
+        self.vehicle.odometer = 12000.0
+        self.vehicle.save()
+        trip = Trip.objects.create(
+            source="A",
+            destination="B",
+            vehicle=self.vehicle,
+            driver=self.driver,
+            cargo_weight=450.0,
+            planned_distance=100.0,
+            status=Trip.Status.DRAFT,
+        )
+        trip.dispatch()
+        trip.complete(final_odometer=12100.0, fuel_consumed=20.0)
+        self.vehicle.refresh_from_db()
+        self.assertEqual(float(self.vehicle.odometer), 12100.0)
+
 
 class ReportsViewTests(APITestCase):
     def setUp(self):
