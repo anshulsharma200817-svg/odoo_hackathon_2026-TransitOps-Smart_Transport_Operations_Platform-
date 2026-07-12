@@ -189,7 +189,11 @@ class ReportsView(APIView):
             fuel = sum((f.liters for f in v.fuel_logs.all()), start=0) or 0
             fuel_cost = sum((f.cost for f in v.fuel_logs.all()), start=0) or 0
             maintenance_cost = sum((m.cost for m in v.maintenance_logs.all()), start=0) or 0
-            op_cost = fuel_cost + maintenance_cost
+            # Exclude MAINTENANCE-type expenses to avoid double-counting against MaintenanceLog.cost
+            other_expenses = sum(
+                (e.amount for e in v.expenses.exclude(type=Expense.Type.MAINTENANCE)), start=0
+            ) or 0
+            op_cost = fuel_cost + maintenance_cost + other_expenses
             fuel_efficiency = (distance / fuel) if fuel else 0
             revenue = 0  # plug in real revenue source if tracked
             roi = ((revenue - op_cost) / v.acquisition_cost) if v.acquisition_cost else 0
