@@ -39,11 +39,19 @@ const EMPTY_SUMMARY = {
 
 import { getRole } from "../api/auth";
 import DriverDashboard from "./DriverDashboard";
+import SafetyDashboard from "./SafetyDashboard";
+import FinancialDashboard from "./FinancialDashboard";
 
 export default function Dashboard() {
   const role = getRole();
   if (role === "DRIVER") {
     return <DriverDashboard />;
+  }
+  if (role === "SAFETY_OFFICER") {
+    return <SafetyDashboard />;
+  }
+  if (role === "FINANCIAL_ANALYST") {
+    return <FinancialDashboard />;
   }
 
   const [vehicles, setVehicles] = useState([]);

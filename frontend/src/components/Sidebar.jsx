@@ -19,12 +19,12 @@ import {
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard", roles: null, Icon: IconDashboard },
   { label: "My Profile", path: "/profile", roles: ["DRIVER"], Icon: IconUser },
-  { label: "Vehicles", path: "/vehicles", roles: ["FLEET_MANAGER"], Icon: IconTruck },
-  { label: "Drivers", path: "/drivers", roles: ["FLEET_MANAGER"], Icon: IconUser },
+  { label: "Vehicles", path: "/vehicles", roles: ["FLEET_MANAGER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"], Icon: IconTruck },
+  { label: "Drivers", path: "/drivers", roles: ["FLEET_MANAGER", "SAFETY_OFFICER"], Icon: IconUser },
   { label: "Trips", path: "/trips", roles: ["FLEET_MANAGER"], Icon: IconRoute },
-  { label: "Maintenance", path: "/maintenance", roles: ["FLEET_MANAGER"], Icon: IconWrench },
-  { label: "Fuel & Expenses", path: "/fuel-expenses", roles: null, Icon: IconFuel },
-  { label: "Reports", path: "/reports", roles: ["FLEET_MANAGER"], Icon: IconChart },
+  { label: "Maintenance", path: "/maintenance", roles: ["FLEET_MANAGER", "SAFETY_OFFICER"], Icon: IconWrench },
+  { label: "Fuel & Expenses", path: "/fuel-expenses", roles: ["FLEET_MANAGER", "DRIVER", "FINANCIAL_ANALYST"], Icon: IconFuel },
+  { label: "Reports", path: "/reports", roles: ["FLEET_MANAGER", "FINANCIAL_ANALYST"], Icon: IconChart },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
