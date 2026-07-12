@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Driver, Expense, FuelLog, MaintenanceLog, Trip, Vehicle
 from .serializers import (
+    CustomTokenObtainPairSerializer,
     DriverSerializer,
     ExpenseSerializer,
     FuelLogSerializer,
@@ -39,7 +40,7 @@ class SignupView(generics.CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
-    pass
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 # ---- Vehicles ------------------------------------------------------------
@@ -126,6 +127,7 @@ class MaintenanceLogViewSet(viewsets.ModelViewSet):
     queryset = MaintenanceLog.objects.all()
     serializer_class = MaintenanceLogSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ["vehicle", "status"]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -146,12 +148,14 @@ class FuelLogViewSet(viewsets.ModelViewSet):
     queryset = FuelLog.objects.all()
     serializer_class = FuelLogSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ["vehicle", "date"]
 
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ["vehicle", "type"]
 
 
 # ---- Dashboard & Reports --------------------------------------------------
@@ -234,6 +238,7 @@ class ReportsView(APIView):
             report.append(
                 {
                     "vehicle": v.registration_number,
+                    "vehicle_name": v.name_model,
                     "fuel_efficiency": round(float(fuel_efficiency), 2),
                     "operational_cost": round(float(op_cost), 2),
                     "roi": round(float(roi), 4),
