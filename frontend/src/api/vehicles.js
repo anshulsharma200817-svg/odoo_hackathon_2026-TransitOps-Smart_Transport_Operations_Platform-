@@ -3,7 +3,7 @@ import client from "./client";
 const MOCK_KEY = "mock_vehicles";
 export const VEHICLE_STATUSES = ["Available", "On Trip", "In Shop", "Retired"];
 
-function readMock() {
+export function readMock() {
   try {
     return JSON.parse(localStorage.getItem(MOCK_KEY)) || [];
   } catch {
@@ -11,7 +11,7 @@ function readMock() {
   }
 }
 
-function writeMock(vehicles) {
+export function writeMock(vehicles) {
   localStorage.setItem(MOCK_KEY, JSON.stringify(vehicles));
 }
 
@@ -59,7 +59,7 @@ seedMock();
 // No response at all means the real API isn't reachable yet, so fall back
 // to the mock. A response that came back (4xx/5xx) means the real backend
 // is live and its error should win.
-function backendUnreachable(error) {
+export function backendUnreachable(error) {
   return !error.response || error.response.status === 401 || error.response.status >= 500;
 }
 
