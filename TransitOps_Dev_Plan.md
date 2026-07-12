@@ -127,8 +127,8 @@ All three devs need this before they can work in parallel. Dev A owns the models
 **Owns:** Simpler, well-defined CRUD, plus all the aggregate math. Less rule-heavy than Dev A's track, but the formulas need to be exactly right.
 
 ### Hour 1 — API Contract + Stubs
-- [ ] Lock the shared API contract above with Dev A and Dev C
-- [ ] Stub empty endpoints (`/api/maintenance/`, `/api/fuel-logs/`, `/api/expenses/`, `/api/dashboard/`, `/api/reports/`) returning mock JSON so Dev C isn't blocked
+- [x] Lock the shared API contract above with Dev A and Dev C
+- [x] Stub empty endpoints (`/api/maintenance/`, `/api/fuel-logs/`, `/api/expenses/`, `/api/dashboard/`, `/api/reports/`) returning mock JSON so Dev C isn't blocked
 - [ ] **Push**
 
 ### Hour 2 — Maintenance
