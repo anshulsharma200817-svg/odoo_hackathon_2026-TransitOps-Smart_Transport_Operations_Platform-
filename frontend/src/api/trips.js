@@ -1,9 +1,11 @@
 import client from "./client";
 import { listVehicles } from "./vehicles";
 import { listDrivers, isLicenseExpired } from "./drivers";
+import { TRIP_STATUS, TRIP_STATUSES, VEHICLE_STATUS, DRIVER_STATUS, statusLabel } from "../lib/enumLabels";
+
+export { TRIP_STATUSES };
 
 const MOCK_KEY = "mock_trips";
-export const TRIP_STATUSES = ["Draft", "Dispatched", "Completed", "Cancelled"];
 
 function readMock() {
   try {
@@ -28,7 +30,7 @@ function seedMock() {
         driver_id: "d-1",
         cargo_weight: 350,
         planned_distance: 150,
-        status: "Draft",
+        status: TRIP_STATUS.DRAFT,
         created_at: "2026-07-12",
         vehicle_display: "VAN-05 (Tata Ace)",
         vehicle_registration_number: "VAN-05",
@@ -44,7 +46,7 @@ function seedMock() {
         driver_id: "d-1",
         cargo_weight: 420,
         planned_distance: 280,
-        status: "Completed",
+        status: TRIP_STATUS.COMPLETED,
         created_at: "2026-07-10",
         completed_at: "2026-07-11T14:30:00.000Z",
         final_odometer: 11950,
@@ -202,7 +204,7 @@ export async function createTrip(payload) {
       driver_id: payload.driver_id,
       cargo_weight: Number(payload.cargo_weight),
       planned_distance: Number(payload.planned_distance),
-      status: "Draft",
+      status: TRIP_STATUS.DRAFT,
       created_at: new Date().toISOString().split("T")[0],
       vehicle_display: vehicleObj ? `${vehicleObj.registration_number} (${vehicleObj.name_model})` : String(payload.vehicle_id),
       vehicle_registration_number: vehicleObj ? vehicleObj.registration_number : String(payload.vehicle_id),
@@ -227,8 +229,8 @@ export async function dispatchTrip(id) {
     const trips = readMock();
     const trip = trips.find((t) => String(t.id) === String(id));
     if (!trip) throw new Error("Trip not found");
-    if (trip.status !== "Draft") {
-      throw new Error(`Cannot dispatch a trip with status "${trip.status}"`);
+    if (trip.status !== TRIP_STATUS.DRAFT) {
+      throw new Error(`Cannot dispatch a trip with status "${statusLabel(trip.status)}"`);
     }
 
     let vehicles = [];
@@ -251,8 +253,10 @@ export async function dispatchTrip(id) {
     if (!vehicle) {
       throw new Error("Assigned vehicle not found");
     }
-    if (vehicle.status !== "Available") {
-      throw new Error(`Vehicle ${vehicle.registration_number} is not available (Status: ${vehicle.status})`);
+    if (vehicle.status !== VEHICLE_STATUS.AVAILABLE) {
+      throw new Error(
+        `Vehicle ${vehicle.registration_number} is not available (Status: ${statusLabel(vehicle.status)})`,
+      );
     }
     if (Number(trip.cargo_weight) > Number(vehicle.max_load_capacity)) {
       throw new Error(`Cargo weight (${trip.cargo_weight} kg) exceeds vehicle capacity (${vehicle.max_load_capacity} kg)`);
@@ -262,22 +266,22 @@ export async function dispatchTrip(id) {
     if (!driver) {
       throw new Error("Assigned driver not found");
     }
-    if (driver.status === "Suspended") {
+    if (driver.status === DRIVER_STATUS.SUSPENDED) {
       throw new Error(`Driver ${driver.name} is Suspended and cannot be dispatched`);
     }
     if (isLicenseExpired(driver)) {
       throw new Error(`Driver ${driver.name}'s license expired on ${driver.license_expiry_date}`);
     }
-    if (driver.status !== "Available") {
-      throw new Error(`Driver ${driver.name} is not available (Status: ${driver.status})`);
+    if (driver.status !== DRIVER_STATUS.AVAILABLE) {
+      throw new Error(`Driver ${driver.name} is not available (Status: ${statusLabel(driver.status)})`);
     }
 
     // Update statuses
-    trip.status = "Dispatched";
+    trip.status = TRIP_STATUS.DISPATCHED;
     trip.dispatched_at = new Date().toISOString();
 
-    vehicle.status = "On Trip";
-    driver.status = "On Trip";
+    vehicle.status = VEHICLE_STATUS.ON_TRIP;
+    driver.status = DRIVER_STATUS.ON_TRIP;
 
     localStorage.setItem("mock_vehicles", JSON.stringify(vehicles));
     localStorage.setItem("mock_drivers", JSON.stringify(drivers));
@@ -301,11 +305,11 @@ export async function completeTrip(id, { final_odometer, fuel_consumed }) {
     const trips = readMock();
     const trip = trips.find((t) => String(t.id) === String(id));
     if (!trip) throw new Error("Trip not found");
-    if (trip.status !== "Dispatched") {
+    if (trip.status !== TRIP_STATUS.DISPATCHED) {
       throw new Error("Only Dispatched trips can be completed");
     }
 
-    trip.status = "Completed";
+    trip.status = TRIP_STATUS.COMPLETED;
     trip.final_odometer = Number(final_odometer);
     trip.fuel_consumed = Number(fuel_consumed);
     trip.completed_at = new Date().toISOString();
@@ -323,7 +327,7 @@ export async function completeTrip(id, { final_odometer, fuel_consumed }) {
       (v) => String(v.id) === String(trip.vehicle_id) || String(v.registration_number) === String(trip.vehicle_id) || String(v.registration_number) === String(trip.vehicle_registration_number)
     );
     if (vehicle) {
-      vehicle.status = "Available";
+      vehicle.status = VEHICLE_STATUS.AVAILABLE;
       if (!isNaN(final_odometer) && Number(final_odometer) > 0) {
         vehicle.odometer = Number(final_odometer);
       }
@@ -334,7 +338,7 @@ export async function completeTrip(id, { final_odometer, fuel_consumed }) {
       (d) => String(d.id) === String(trip.driver_id) || String(d.name) === String(trip.driver_id) || String(d.name) === String(trip.driver_name)
     );
     if (driver) {
-      driver.status = "Available";
+      driver.status = DRIVER_STATUS.AVAILABLE;
       localStorage.setItem("mock_drivers", JSON.stringify(drivers));
     }
 
@@ -354,11 +358,11 @@ export async function cancelTrip(id) {
     const trips = readMock();
     const trip = trips.find((t) => String(t.id) === String(id));
     if (!trip) throw new Error("Trip not found");
-    if (trip.status !== "Dispatched") {
+    if (trip.status !== TRIP_STATUS.DISPATCHED) {
       throw new Error("Only Dispatched trips can be cancelled");
     }
 
-    trip.status = "Cancelled";
+    trip.status = TRIP_STATUS.CANCELLED;
     trip.cancelled_at = new Date().toISOString();
 
     let vehicles = [];
@@ -374,7 +378,7 @@ export async function cancelTrip(id) {
       (v) => String(v.id) === String(trip.vehicle_id) || String(v.registration_number) === String(trip.vehicle_id) || String(v.registration_number) === String(trip.vehicle_registration_number)
     );
     if (vehicle) {
-      vehicle.status = "Available";
+      vehicle.status = VEHICLE_STATUS.AVAILABLE;
       localStorage.setItem("mock_vehicles", JSON.stringify(vehicles));
     }
 
@@ -382,7 +386,7 @@ export async function cancelTrip(id) {
       (d) => String(d.id) === String(trip.driver_id) || String(d.name) === String(trip.driver_id) || String(d.name) === String(trip.driver_name)
     );
     if (driver) {
-      driver.status = "Available";
+      driver.status = DRIVER_STATUS.AVAILABLE;
       localStorage.setItem("mock_drivers", JSON.stringify(drivers));
     }
 

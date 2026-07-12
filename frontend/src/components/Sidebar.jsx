@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { clearSession, getRole } from "../api/auth";
+import { statusLabel } from "../lib/enumLabels";
 import {
   Logo,
   IconDashboard,
@@ -97,7 +98,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
         <div className="border-t border-white/10 px-3 py-4">
           {role && (
             <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wide text-slate-500">
-              {role}
+              {statusLabel(role)}
             </div>
           )}
           <button

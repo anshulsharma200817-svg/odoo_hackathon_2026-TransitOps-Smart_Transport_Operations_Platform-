@@ -16,6 +16,7 @@ import {
 import { listAvailableVehicles } from "../api/vehicles";
 import { listAvailableDrivers } from "../api/drivers";
 import { TRIP_STATUS_VARIANTS } from "../lib/statusVariants";
+import { TRIP_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconRoute, IconTruck, IconUser } from "../components/icons";
 
 const EMPTY_CREATE_FORM = {
@@ -369,11 +370,11 @@ export default function Trips() {
 
   // Quick KPI metrics
   const totalTripsCount = trips.length;
-  const activeDispatchedCount = trips.filter((t) => t.status === "Dispatched").length;
+  const activeDispatchedCount = trips.filter((t) => t.status === TRIP_STATUS.DISPATCHED).length;
   const totalCargoInTransit = trips
-    .filter((t) => t.status === "Dispatched")
+    .filter((t) => t.status === TRIP_STATUS.DISPATCHED)
     .reduce((acc, t) => acc + (Number(t.cargo_weight) || 0), 0);
-  const completedTripsCount = trips.filter((t) => t.status === "Completed").length;
+  const completedTripsCount = trips.filter((t) => t.status === TRIP_STATUS.COMPLETED).length;
 
   return (
     <div className="min-h-full space-y-8 p-4 sm:p-8">
@@ -426,9 +427,9 @@ export default function Trips() {
         </div>
 
         <div
-          onClick={() => setStatusFilter(statusFilter === "Dispatched" ? "" : "Dispatched")}
+          onClick={() => setStatusFilter(statusFilter === TRIP_STATUS.DISPATCHED ? "" : TRIP_STATUS.DISPATCHED)}
           className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl ${
-            statusFilter === "Dispatched"
+            statusFilter === TRIP_STATUS.DISPATCHED
               ? "border-blue-500/40 bg-gradient-to-br from-blue-50/80 via-white to-blue-50/30 shadow-md ring-2 ring-blue-500/20"
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
@@ -469,9 +470,9 @@ export default function Trips() {
         </div>
 
         <div
-          onClick={() => setStatusFilter(statusFilter === "Completed" ? "" : "Completed")}
+          onClick={() => setStatusFilter(statusFilter === TRIP_STATUS.COMPLETED ? "" : TRIP_STATUS.COMPLETED)}
           className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl ${
-            statusFilter === "Completed"
+            statusFilter === TRIP_STATUS.COMPLETED
               ? "border-emerald-500/40 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 shadow-md ring-2 ring-emerald-500/20"
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
@@ -514,7 +515,7 @@ export default function Trips() {
             <option value="">All Trip Statuses</option>
             {TRIP_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </Select>
@@ -595,11 +596,11 @@ export default function Trips() {
             >
               <div
                 className={`absolute top-0 left-0 right-0 h-1.5 transition-opacity ${
-                  trip.status === "Dispatched"
+                  trip.status === TRIP_STATUS.DISPATCHED
                     ? "bg-blue-500 animate-pulse"
-                    : trip.status === "Completed"
+                    : trip.status === TRIP_STATUS.COMPLETED
                     ? "bg-emerald-500"
-                    : trip.status === "Draft"
+                    : trip.status === TRIP_STATUS.DRAFT
                     ? "bg-amber-500"
                     : "bg-slate-300"
                 }`}
@@ -617,10 +618,10 @@ export default function Trips() {
                   </div>
                   <Badge variant={TRIP_STATUS_VARIANTS[trip.status] || "gray"} className="px-2.5 py-1 font-semibold shrink-0">
                     <span className="flex items-center gap-1.5">
-                      {trip.status === "Dispatched" && (
+                      {trip.status === TRIP_STATUS.DISPATCHED && (
                         <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
                       )}
-                      {trip.status}
+                      {statusLabel(trip.status)}
                     </span>
                   </Badge>
                 </div>
@@ -652,7 +653,7 @@ export default function Trips() {
 
               {/* Action Buttons Bar */}
               <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3.5">
-                {trip.status === "Draft" && (
+                {trip.status === TRIP_STATUS.DRAFT && (
                   <>
                     <span className="text-[11px] font-semibold text-amber-600">Ready to dispatch</span>
                     <button
@@ -672,7 +673,7 @@ export default function Trips() {
                   </>
                 )}
 
-                {trip.status === "Dispatched" && (
+                {trip.status === TRIP_STATUS.DISPATCHED && (
                   <div className="flex w-full items-center justify-between gap-2">
                     <button
                       type="button"
@@ -691,7 +692,7 @@ export default function Trips() {
                   </div>
                 )}
 
-                {trip.status === "Completed" && (
+                {trip.status === TRIP_STATUS.COMPLETED && (
                   <div className="flex w-full items-center justify-between text-xs text-slate-600 font-medium">
                     <span>
                       Final Odo: <strong className="text-slate-900">{trip.final_odometer || "-"} km</strong>
@@ -702,7 +703,7 @@ export default function Trips() {
                   </div>
                 )}
 
-                {trip.status === "Cancelled" && (
+                {trip.status === TRIP_STATUS.CANCELLED && (
                   <span className="text-xs font-semibold text-slate-400 italic">Trip Cancelled</span>
                 )}
               </div>
@@ -746,16 +747,16 @@ export default function Trips() {
                     <td className="px-6 py-4">
                       <Badge variant={TRIP_STATUS_VARIANTS[trip.status] || "gray"} className="px-2.5 py-1 font-semibold">
                         <span className="flex items-center gap-1">
-                          {trip.status === "Dispatched" && (
+                          {trip.status === TRIP_STATUS.DISPATCHED && (
                             <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
                           )}
-                          {trip.status}
+                          {statusLabel(trip.status)}
                         </span>
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {trip.status === "Draft" && (
+                        {trip.status === TRIP_STATUS.DRAFT && (
                           <button
                             type="button"
                             onClick={() => handleDispatch(trip)}
@@ -765,7 +766,7 @@ export default function Trips() {
                             Dispatch
                           </button>
                         )}
-                        {trip.status === "Dispatched" && (
+                        {trip.status === TRIP_STATUS.DISPATCHED && (
                           <>
                             <button
                               type="button"
@@ -783,14 +784,14 @@ export default function Trips() {
                             </button>
                           </>
                         )}
-                        {trip.status === "Completed" && (
+                        {trip.status === TRIP_STATUS.COMPLETED && (
                           <span className="text-xs text-slate-500 font-medium">
                             {trip.final_odometer !== undefined && trip.final_odometer !== null
                               ? `Odo: ${trip.final_odometer} km · Fuel: ${trip.fuel_consumed || 0} L`
                               : "Completed"}
                           </span>
                         )}
-                        {trip.status === "Cancelled" && (
+                        {trip.status === TRIP_STATUS.CANCELLED && (
                           <span className="text-xs text-slate-400">Cancelled</span>
                         )}
                       </div>

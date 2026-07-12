@@ -1,5 +1,6 @@
 import client from "./client";
 import { readMock as readMockVehicles, writeMock as writeMockVehicles, backendUnreachable } from "./vehicles";
+import { VEHICLE_STATUS, MAINTENANCE_STATUS } from "../lib/enumLabels";
 
 const MOCK_KEY = "mock_maintenance";
 
@@ -26,7 +27,7 @@ function seedMock() {
         cost: 4500,
         date_opened: new Date().toISOString().split("T")[0],
         date_closed: null,
-        status: "Open",
+        status: MAINTENANCE_STATUS.OPEN,
       },
       {
         id: "m-2",
@@ -36,7 +37,7 @@ function seedMock() {
         cost: 2100,
         date_opened: "2026-07-01",
         date_closed: "2026-07-03",
-        status: "Closed",
+        status: MAINTENANCE_STATUS.CLOSED,
       },
     ]);
   }
@@ -62,15 +63,15 @@ export async function createMaintenanceLog(payload) {
       String(v.registration_number) === String(payload.vehicle)
   );
 
-  if (vehicleObj && (vehicleObj.status === "Retired" || vehicleObj.status === "RETIRED")) {
+  if (vehicleObj && vehicleObj.status === VEHICLE_STATUS.RETIRED) {
     throw new Error("Cannot open a maintenance record for a retired vehicle.");
   }
 
-  // Ensure mock/local vehicles are updated to "In Shop" when a maintenance log opens
-  if (vehicleObj && vehicleObj.status !== "In Shop" && vehicleObj.status !== "IN_SHOP") {
+  // Ensure mock/local vehicles are updated to In Shop when a maintenance log opens
+  if (vehicleObj && vehicleObj.status !== VEHICLE_STATUS.IN_SHOP) {
     const updatedVehicles = vehicles.map((v) =>
       String(v.id) === String(vehicleObj.id) || String(v.registration_number) === String(vehicleObj.registration_number)
-        ? { ...v, status: v.status === "AVAILABLE" || v.status === "ON_TRIP" ? "IN_SHOP" : "In Shop" }
+        ? { ...v, status: VEHICLE_STATUS.IN_SHOP }
         : v
     );
     writeMockVehicles(updatedVehicles);
@@ -94,7 +95,7 @@ export async function createMaintenanceLog(payload) {
       cost: Number(payload.cost || 0),
       date_opened: payload.date_opened || new Date().toISOString().split("T")[0],
       date_closed: null,
-      status: "Open",
+      status: MAINTENANCE_STATUS.OPEN,
     };
     writeMock([newLog, ...logs]);
     return newLog;
@@ -115,7 +116,7 @@ export async function closeMaintenanceLog(id) {
     if (!target) {
       throw new Error("Maintenance log not found");
     }
-    target.status = "Closed";
+    target.status = MAINTENANCE_STATUS.CLOSED;
     target.date_closed = new Date().toISOString().split("T")[0];
     writeMock(logs);
     closedLog = target;
@@ -135,16 +136,15 @@ export async function closeMaintenanceLog(id) {
   let vehicleReg = vehicleObj?.registration_number || closedLog?.vehicle_display || closedLog?.vehicle || "Vehicle";
 
   if (vehicleObj) {
-    if (vehicleObj.status === "Retired" || vehicleObj.status === "RETIRED") {
+    if (vehicleObj.status === VEHICLE_STATUS.RETIRED) {
       // Stays Retired per requirement
       resultVehicleStatus = vehicleObj.status;
     } else {
-      const newStatus = vehicleObj.status === "IN_SHOP" ? "AVAILABLE" : "Available";
       const updatedVehicles = vehicles.map((v) =>
-        String(v.id) === String(vehicleObj.id) ? { ...v, status: newStatus } : v
+        String(v.id) === String(vehicleObj.id) ? { ...v, status: VEHICLE_STATUS.AVAILABLE } : v
       );
       writeMockVehicles(updatedVehicles);
-      resultVehicleStatus = newStatus;
+      resultVehicleStatus = VEHICLE_STATUS.AVAILABLE;
     }
   }
 

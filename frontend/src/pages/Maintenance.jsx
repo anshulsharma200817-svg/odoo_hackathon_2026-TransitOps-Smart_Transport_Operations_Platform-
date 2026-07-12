@@ -8,6 +8,7 @@ import { useToast } from "../components/ui/ToastProvider";
 import { listMaintenanceLogs, createMaintenanceLog, closeMaintenanceLog } from "../api/maintenance";
 import { listVehicles } from "../api/vehicles";
 import { MAINTENANCE_STATUS_VARIANTS, VEHICLE_STATUS_VARIANTS } from "../lib/statusVariants";
+import { VEHICLE_STATUS, MAINTENANCE_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconWrench, IconTruck } from "../components/icons";
 
 const EMPTY_FORM = {
@@ -24,7 +25,7 @@ function CreateMaintenanceForm({ vehicles, onSubmit, onCancel }) {
 
   // Filter out retired vehicles for new maintenance logs per contract constraint
   const eligibleVehicles = useMemo(
-    () => vehicles.filter((v) => v.status !== "Retired" && v.status !== "RETIRED"),
+    () => vehicles.filter((v) => v.status !== VEHICLE_STATUS.RETIRED),
     [vehicles]
   );
 
@@ -84,7 +85,7 @@ function CreateMaintenanceForm({ vehicles, onSubmit, onCancel }) {
           >
             {eligibleVehicles.map((v) => (
               <option key={v.id || v.registration_number} value={v.id || v.registration_number}>
-                {v.registration_number} ({v.name_model} · Current Status: {v.status})
+                {v.registration_number} ({v.name_model} · Current Status: {statusLabel(v.status)})
               </option>
             ))}
           </select>
@@ -179,7 +180,7 @@ export default function Maintenance() {
 
       const vStatus = result._vehicleStatus;
       const vReg = result._vehicleRegistration || "Vehicle";
-      if (vStatus === "Retired" || vStatus === "RETIRED") {
+      if (vStatus === VEHICLE_STATUS.RETIRED) {
         showToast(
           `Log closed. Note: Vehicle ${vReg} remains in Retired status and was not restored to Available.`,
           "error"
@@ -233,8 +234,7 @@ export default function Maintenance() {
   const totalCost = logs.reduce((acc, l) => acc + (Number(l.cost) || 0), 0);
 
   const closingVehicleObj = closingLog ? getVehicleObj(closingLog) : null;
-  const isClosingRetired =
-    closingVehicleObj?.status === "Retired" || closingVehicleObj?.status === "RETIRED";
+  const isClosingRetired = closingVehicleObj?.status === VEHICLE_STATUS.RETIRED;
 
   return (
     <div className="min-h-full space-y-8 p-4 sm:p-8 animate-fade-in">
@@ -441,7 +441,7 @@ export default function Maintenance() {
                     >
                       <span className="flex items-center gap-1.5">
                         {isOpen && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />}
-                        {log.status}
+                        {statusLabel(log.status)}
                       </span>
                     </Badge>
                   </div>

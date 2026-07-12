@@ -13,6 +13,7 @@ import {
   DRIVER_STATUSES,
 } from "../api/drivers";
 import { DRIVER_STATUS_VARIANTS } from "../lib/statusVariants";
+import { DRIVER_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconUser } from "../components/icons";
 
 const EMPTY_FORM = {
@@ -113,7 +114,7 @@ function DriverForm({ initialValues, onSubmit, onCancel }) {
         >
           {DRIVER_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {statusLabel(s)}
             </option>
           ))}
         </Select>
@@ -172,7 +173,7 @@ export default function Drivers() {
 
   // Quick KPI metrics
   const totalDriversCount = drivers.length;
-  const activeOnTripCount = drivers.filter((d) => d.status === "On Trip").length;
+  const activeOnTripCount = drivers.filter((d) => d.status === DRIVER_STATUS.ON_TRIP).length;
   const expiredCount = drivers.filter((d) => isLicenseExpired(d)).length;
   const avgSafetyScore = totalDriversCount
     ? Math.round(drivers.reduce((acc, d) => acc + (Number(d.safety_score) || 0), 0) / totalDriversCount)
@@ -251,9 +252,9 @@ export default function Drivers() {
         </div>
 
         <div
-          onClick={() => setStatusFilter(statusFilter === "On Trip" ? "" : "On Trip")}
+          onClick={() => setStatusFilter(statusFilter === DRIVER_STATUS.ON_TRIP ? "" : DRIVER_STATUS.ON_TRIP)}
           className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl ${
-            statusFilter === "On Trip"
+            statusFilter === DRIVER_STATUS.ON_TRIP
               ? "border-emerald-500/40 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 shadow-md ring-2 ring-emerald-500/20"
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
@@ -345,7 +346,7 @@ export default function Drivers() {
             <option value="">All Driver Statuses</option>
             {DRIVER_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </Select>
@@ -450,10 +451,10 @@ export default function Drivers() {
                     </div>
                     <Badge variant={DRIVER_STATUS_VARIANTS[d.status] || "gray"} className="px-3 py-1 font-semibold shrink-0">
                       <span className="flex items-center gap-1.5">
-                        {d.status === "On Trip" && (
+                        {d.status === DRIVER_STATUS.ON_TRIP && (
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                         )}
-                        {d.status}
+                        {statusLabel(d.status)}
                       </span>
                     </Badge>
                   </div>
@@ -565,7 +566,7 @@ export default function Drivers() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant={DRIVER_STATUS_VARIANTS[d.status] || "gray"} className="px-2.5 py-1 font-semibold">
-                          {d.status}
+                          {statusLabel(d.status)}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right">

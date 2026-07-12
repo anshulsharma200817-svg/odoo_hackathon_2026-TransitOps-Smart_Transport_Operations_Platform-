@@ -5,6 +5,7 @@ import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import Button from "../components/ui/Button";
 import { signup, login, storeSession, ROLES } from "../api/auth";
+import { statusLabel } from "../lib/enumLabels";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export default function Signup() {
           <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
             {ROLES.map((r) => (
               <option key={r} value={r}>
-                {r}
+                {statusLabel(r)}
               </option>
             ))}
           </Select>

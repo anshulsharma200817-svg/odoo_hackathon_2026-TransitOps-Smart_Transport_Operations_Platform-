@@ -1,7 +1,9 @@
 import client from "./client";
+import { ROLE, ROLES } from "../lib/enumLabels";
+
+export { ROLES };
 
 const MOCK_USERS_KEY = "mock_users";
-export const ROLES = ["Fleet Manager", "Driver", "Safety Officer", "Financial Analyst"];
 
 function readMockUsers() {
   try {
@@ -18,7 +20,7 @@ function writeMockUsers(users) {
 // Seed one demo account so login can be exercised before signup/backend exist.
 function seedDemoUser() {
   if (readMockUsers().length === 0) {
-    writeMockUsers([{ email: "admin@transitops.dev", password: "password123", role: "Fleet Manager" }]);
+    writeMockUsers([{ email: "admin@transitops.dev", password: "password123", role: ROLE.FLEET_MANAGER }]);
   }
 }
 seedDemoUser();
