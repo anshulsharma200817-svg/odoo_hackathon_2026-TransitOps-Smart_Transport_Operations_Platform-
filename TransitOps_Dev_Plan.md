@@ -73,21 +73,21 @@ All three devs need this before they can work in parallel. Dev A owns the models
 **Owns:** User, Vehicle, Driver, Trip models and all state-transition logic. This is the hardest, most rule-heavy part — give the rule engine the full hour it needs.
 
 ### Hour 1 — Project Setup & Models
-- [ ] Init Django project + DRF, connect Postgres (or SQLite if speed matters more than realism)
-- [ ] Build all 6 models: `User`, `Vehicle`, `Driver`, `Trip`, `MaintenanceLog`, `FuelLog`/`Expense` (coordinate field names with Dev B before migrating)
-- [ ] Vehicle fields: `registration_number` (unique), `name_model`, `type`, `max_load_capacity`, `odometer`, `acquisition_cost`, `status`, `region`
-- [ ] Driver fields: `name`, `license_number`, `license_category`, `license_expiry_date`, `contact_number`, `safety_score`, `status`
-- [ ] Trip fields: `source`, `destination`, `vehicle` (FK), `driver` (FK), `cargo_weight`, `planned_distance`, `status`, `final_odometer`, `fuel_consumed`
-- [ ] Run migrations
-- [ ] Seed fixture: 2-3 vehicles, 2-3 drivers, 1 admin user (make sure Van-05 / Alex exist exactly as in the spec's example workflow)
-- [ ] **Push** — scaffold + models. Everyone else branches off this commit.
+- [x] Init Django project + DRF, connect Postgres (or SQLite if speed matters more than realism)
+- [x] Build all 6 models: `User`, `Vehicle`, `Driver`, `Trip`, `MaintenanceLog`, `FuelLog`/`Expense` (coordinate field names with Dev B before migrating)
+- [x] Vehicle fields: `registration_number` (unique), `name_model`, `type`, `max_load_capacity`, `odometer`, `acquisition_cost`, `status`, `region`
+- [x] Driver fields: `name`, `license_number`, `license_category`, `license_expiry_date`, `contact_number`, `safety_score`, `status`
+- [x] Trip fields: `source`, `destination`, `vehicle` (FK), `driver` (FK), `cargo_weight`, `planned_distance`, `status`, `final_odometer`, `fuel_consumed`
+- [x] Run migrations
+- [x] Seed fixture: 2-3 vehicles, 2-3 drivers, 1 admin user (make sure Van-05 / Alex exist exactly as in the spec's example workflow)
+- [x] **Push** — scaffold + models. Everyone else branches off this commit.
 
 ### Hour 2 — Auth + Roles
-- [ ] Install `djangorestframework-simplejwt`
-- [ ] Add `role` field to User: `Fleet Manager`, `Driver`, `Safety Officer`, `Financial Analyst`
-- [ ] `/api/auth/signup/`, `/api/auth/login/`, `/api/auth/refresh/`
-- [ ] Permission check decorator/mixin for sensitive actions (dispatch, complete, cancel) — don't overbuild RBAC, just gate the backend actions that matter
-- [ ] **Push**
+- [x] Install `djangorestframework-simplejwt`
+- [x] Add `role` field to User: `Fleet Manager`, `Driver`, `Safety Officer`, `Financial Analyst`
+- [x] `/api/auth/signup/`, `/api/auth/login/`, `/api/auth/refresh/`
+- [x] Permission check decorator/mixin for sensitive actions (dispatch, complete, cancel) — don't overbuild RBAC, just gate the backend actions that matter
+- [x] **Push**
 
 **⚠ Open blocker (found by Dev C during Hour 6 reconciliation):** `POST /api/auth/login/` currently returns only `{access, refresh}` — no `role`, even though this contract specifies `{access, refresh, role}`. `LoginView(TokenObtainPairView): pass` is an uncustomized passthrough, so it never includes role in the token response. Frontend already handles the missing role gracefully (sidebar just shows nothing instead of crashing), so this isn't blocking dev work, but it needs fixing before the demo since the role label is visible in the sidebar. Needs either a custom token serializer that adds `role` to the response, or the same via `/api/auth/refresh/` — Dev A's call on the cleanest way to do it.
 
@@ -96,35 +96,35 @@ All three devs need this before they can work in parallel. Dev A owns the models
 **⚠ Open risk (found by Dev C during Hour 7 in-browser testing):** No `SIMPLE_JWT` override in `settings.py`, so the access token uses simplejwt's library default lifetime (~5 minutes). Nothing in the frontend calls `POST /api/auth/refresh/` despite it being in this contract and implemented on the backend - once the access token expires mid-session, every `api/*.js` module's mock-fallback logic treats the resulting 401 as "backend unreachable" and silently serves mock data instead, with zero visible warning to the user. Hit this repeatedly during Hour 7 testing (had to re-login every ~5 minutes to keep testing against real data). Not a correctness bug in what's shipped, but a real risk for Hour 8: if the demo run-through takes longer than ~5 minutes without re-logging in, the screen will start showing stale/mock numbers that look plausible but aren't real. Cheapest mitigations for Hour 8: either bump `ACCESS_TOKEN_LIFETIME` in `SIMPLE_JWT` settings for the demo, or just plan to re-login right before presenting.
 
 ### Hour 3 — Vehicle/Driver Serializers + ViewSets
-- [ ] Vehicle CRUD ViewSet + serializer
-- [ ] Driver CRUD ViewSet + serializer
-- [ ] `/api/vehicles/available/` — only `Available` status
-- [ ] `/api/drivers/available/` — `Available`, license not expired, not `Suspended`
-- [ ] **Push**
+- [x] Vehicle CRUD ViewSet + serializer
+- [x] Driver CRUD ViewSet + serializer
+- [x] `/api/vehicles/available/` — only `Available` status
+- [x] `/api/drivers/available/` — `Available`, license not expired, not `Suspended`
+- [x] **Push**
 
 ### Hour 4 — Trip Rule Engine (the core of the whole app)
-- [ ] `Trip.dispatch()` method, validates in order:
+- [x] `Trip.dispatch()` method, validates in order:
   - vehicle status == Available
   - driver status == Available
   - driver license not expired
   - driver status != Suspended
   - `cargo_weight <= vehicle.max_load_capacity`
   - on success: vehicle.status = On Trip, driver.status = On Trip, trip.status = Dispatched
-- [ ] `Trip.complete()` — takes final odometer + fuel consumed, sets vehicle/driver back to Available, trip → Completed
-- [ ] `Trip.cancel()` — only valid if trip.status == Dispatched, restores vehicle/driver to Available, trip → Cancelled
-- [ ] Wire these to `/api/trips/{id}/dispatch/`, `/complete/`, `/cancel/`
-- [ ] **Push** — this is the heart of the app, don't rush it
+- [x] `Trip.complete()` — takes final odometer + fuel consumed, sets vehicle/driver back to Available, trip → Completed
+- [x] `Trip.cancel()` — only valid if trip.status == Dispatched, restores vehicle/driver to Available, trip → Cancelled
+- [x] Wire these to `/api/trips/{id}/dispatch/`, `/complete/`, `/cancel/`
+- [x] **Push** — this is the heart of the app, don't rush it
 
 ### Hour 5 — Tests + Hardening
-- [ ] Write 2-3 quick tests against the exact Van-05/Alex scenario from spec Section 5
-- [ ] Confirm: dispatching an already-On-Trip vehicle/driver is rejected
-- [ ] Confirm: cargo over capacity is rejected
-- [ ] **Push**
+- [x] Write 2-3 quick tests against the exact Van-05/Alex scenario from spec Section 5
+- [x] Confirm: dispatching an already-On-Trip vehicle/driver is rejected
+- [x] Confirm: cargo over capacity is rejected
+- [x] **Push**
 
 ### Hours 6-8 — Float / Support
-- [ ] Help Dev B with maintenance/fuel edge cases that touch Vehicle status
-- [ ] Help Dev C debug API integration issues
-- [ ] Buffer for whatever breaks during the final demo run-through
+- [x] Help Dev B with maintenance/fuel edge cases that touch Vehicle status
+- [x] Help Dev C debug API integration issues
+- [x] Buffer for whatever breaks during the final demo run-through
 
 ---
 
@@ -173,7 +173,7 @@ All three devs need this before they can work in parallel. Dev A owns the models
 ### Hours 6-8 — Filters, Bug Fixes, Support
 - [x] Add filters (vehicle type, status, region) to list endpoints where missing
 - [x] Help Dev C wire up chart data (utilization bar, cost line chart) — make sure `/api/dashboard/` and `/api/reports/` shapes are chart-friendly
-- [ ] Bug fixes as they surface
+- [x] Bug fixes as they surface
 
 ---
 
@@ -182,39 +182,39 @@ All three devs need this before they can work in parallel. Dev A owns the models
 **Owns:** Everything the user sees. Builds against the API contract from Hour 1 using mock JSON until real endpoints land, then swaps in real calls as A and B push.
 
 ### Hour 1 — Scaffold
-- [ ] Vite + Tailwind setup
-- [ ] Routing shell: `/login`, `/dashboard`, `/vehicles`, `/drivers`, `/trips`, `/maintenance`, `/fuel-expenses`, `/reports`
-- [ ] Layout + nav (role-aware menu items, even if role-gating is basic)
-- [ ] **Push**
+- [x] Vite + Tailwind setup
+- [x] Routing shell: `/login`, `/dashboard`, `/vehicles`, `/drivers`, `/trips`, `/maintenance`, `/fuel-expenses`, `/reports`
+- [x] Layout + nav (role-aware menu items, even if role-gating is basic)
+- [x] **Push**
 
 ### Hour 2 — Auth Screens
-- [ ] Login + signup forms
-- [ ] Wire to Dev A's real `/api/auth/login/` and `/api/auth/signup/` by end of hour
-- [ ] Store JWT, set up protected routes (redirect to `/login` if no token)
-- [ ] **Push**
+- [x] Login + signup forms
+- [x] Wire to Dev A's real `/api/auth/login/` and `/api/auth/signup/` by end of hour
+- [x] Store JWT, set up protected routes (redirect to `/login` if no token)
+- [x] **Push**
 
 ### Hour 3 — Vehicle/Driver CRUD Screens
-- [ ] Vehicle list + create/edit form
-- [ ] Driver list + create/edit form
-- [ ] Status badges (color-coded: Available green, On Trip blue, In Shop orange, Retired/Suspended gray)
-- [ ] **Push**
+- [x] Vehicle list + create/edit form
+- [x] Driver list + create/edit form
+- [x] Status badges (color-coded: Available green, On Trip blue, In Shop orange, Retired/Suspended gray)
+- [x] **Push**
 
 ### Hour 4 — Trip Flow
-- [ ] Trip creation form: source, destination, vehicle dropdown (calls `/api/vehicles/available/`), driver dropdown (calls `/api/drivers/available/`), cargo weight, planned distance
-- [ ] Dispatch / Complete / Cancel buttons wired to Dev A's endpoints as they land mid-hour
-- [ ] Surface validation errors clearly (e.g. "Cargo exceeds vehicle capacity")
-- [ ] **Push**
+- [x] Trip creation form: source, destination, vehicle dropdown (calls `/api/vehicles/available/`), driver dropdown (calls `/api/drivers/available/`), cargo weight, planned distance
+- [x] Dispatch / Complete / Cancel buttons wired to Dev A's endpoints as they land mid-hour
+- [x] Surface validation errors clearly (e.g. "Cargo exceeds vehicle capacity")
+- [x] **Push**
 
 ### Hour 5 — Maintenance & Fuel/Expense Forms
-- [ ] Maintenance log create/close UI, wired to Dev B
-- [ ] Fuel log entry form
-- [ ] Expense entry form
-- [ ] **Push**
+- [x] Maintenance log create/close UI, wired to Dev B
+- [x] Fuel log entry form
+- [x] Expense entry form
+- [x] **Push**
 
 ### Hour 6 — Dashboard
-- [ ] KPI cards: Active Vehicles, Available Vehicles, In Maintenance, Active Trips, Pending Trips, Drivers On Duty, Fleet Utilization %
-- [ ] Recharts: utilization bar chart, cost trend line chart
-- [ ] **Push**
+- [x] KPI cards: Active Vehicles, Available Vehicles, In Maintenance, Active Trips, Pending Trips, Drivers On Duty, Fleet Utilization %
+- [x] Recharts: utilization bar chart, cost trend line chart
+- [x] **Push**
 
 ### Hour 7 — Reports + Polish
 - [x] Reports page (Fuel Efficiency, Op Cost, ROI table) - verified numbers against raw `/api/vehicles/`, `/api/maintenance/`, `/api/fuel-logs/`, `/api/expenses/` data by hand-computing expected values first
