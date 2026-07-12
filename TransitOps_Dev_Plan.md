@@ -89,6 +89,8 @@ All three devs need this before they can work in parallel. Dev A owns the models
 - [ ] Permission check decorator/mixin for sensitive actions (dispatch, complete, cancel) — don't overbuild RBAC, just gate the backend actions that matter
 - [ ] **Push**
 
+**⚠ Open blocker (found by Dev C during Hour 6 reconciliation):** `POST /api/auth/login/` currently returns only `{access, refresh}` — no `role`, even though this contract specifies `{access, refresh, role}`. `LoginView(TokenObtainPairView): pass` is an uncustomized passthrough, so it never includes role in the token response. Frontend already handles the missing role gracefully (sidebar just shows nothing instead of crashing), so this isn't blocking dev work, but it needs fixing before the demo since the role label is visible in the sidebar. Needs either a custom token serializer that adds `role` to the response, or the same via `/api/auth/refresh/` — Dev A's call on the cleanest way to do it.
+
 ### Hour 3 — Vehicle/Driver Serializers + ViewSets
 - [ ] Vehicle CRUD ViewSet + serializer
 - [ ] Driver CRUD ViewSet + serializer
