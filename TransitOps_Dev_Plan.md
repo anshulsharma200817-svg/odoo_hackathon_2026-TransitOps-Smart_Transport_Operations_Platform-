@@ -145,13 +145,13 @@ All three devs need this before they can work in parallel. Dev A owns the models
 - [x] **Push**
 
 ### Hour 4 — Dashboard KPI Endpoint
-- [ ] `/api/dashboard/` returns in one payload:
+- [x] `/api/dashboard/` returns in one payload:
   - Active Vehicles, Available Vehicles, Vehicles In Maintenance
   - Active Trips, Pending Trips
   - Drivers On Duty
   - **Fleet Utilization %** = `(Vehicles On Trip / Total Active Vehicles) × 100`
-- [ ] Add query params for filters: `?type=`, `?status=`, `?region=`
-- [ ] **Push**
+- [x] Add query params for filters: `?type=`, `?status=`, `?region=`
+- [x] **Push**
 
 ### Hour 5 — Reports + CSV
 - [ ] `/api/reports/` per-vehicle:
