@@ -6,12 +6,17 @@ TransitOps is a modern, responsive, and comprehensive fleet management and trans
 
 ## ✨ Key Features
 
+- **Role-Based Access Control (RBAC)**: Distinct dashboards and restricted sidebar navigation tailored for different user roles:
+  - **Fleet Manager**: Full administrative access to dispatch, monitor, and configure.
+  - **Driver**: Simplified interface focused on their profile credentials and quick logging of trip/fuel expenses.
+  - **Safety Officer**: Specialized dashboard emphasizing average safety scores, active driver licenses, and vehicles in the workshop.
+  - **Financial Analyst**: Analytical view centered on operational costs, total fuel expenses, and ROI metrics.
 - **Fleet Management**: Register, track, and manage vehicles (Trucks, Vans, EVs, etc.). Monitor live statuses, odometers, and payload capacities.
 - **Interactive Dashboards**: Real-time KPI summaries including active fleets on the road, vehicles in maintenance, and total asset value.
 - **Drivers & Operations**: Keep track of operators, manage their assignments, and view operational metrics.
 - **Trip & Route Tracking**: Dispatch vehicles, manage routes, and track ongoing trips.
 - **Maintenance Logs**: Log repairs and service history to minimize downtime and prevent breakdowns.
-- **Financial & Fuel Analytics**: Track expenses, including fuel logs, and generate high-level business reports.
+- **Financial & Fuel Analytics**: Track expenses in localized currency (₹), including fuel logs, and generate high-level business CSV reports.
 - **Premium UI/UX**: Built with a sleek, interactive, and highly responsive interface using Tailwind CSS and Recharts.
 
 ## 🛠 Tech Stack
