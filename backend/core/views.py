@@ -84,14 +84,14 @@ class TripViewSet(viewsets.ModelViewSet):
     filterset_fields = ["status"]
 
     def get_permissions(self):
-        if self.action in ["dispatch", "cancel"]:
+        if self.action in ["dispatch", "dispatch_trip", "cancel"]:
             return [IsAuthenticated(), IsFleetManager()]
         elif self.action == "complete":
             return [IsAuthenticated(), IsFleetManagerOrDriver()]
         return super().get_permissions()
 
-    @action(detail=True, methods=["post"])
-    def dispatch(self, request, pk=None):
+    @action(detail=True, methods=["post"], url_path="dispatch")
+    def dispatch_trip(self, request, pk=None):
         trip = self.get_object()
         try:
             trip.dispatch()
