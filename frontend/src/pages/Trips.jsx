@@ -379,7 +379,7 @@ export default function Trips() {
   return (
     <div className="min-h-full space-y-8 p-4 sm:p-8">
       {/* Top Header with Gradient Accent */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white shadow-glow">
@@ -454,9 +454,9 @@ export default function Trips() {
         </div>
 
         <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-700">Cargo In-Transit</span>
-            <span className="rounded-md bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-600">
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate text-xs font-bold uppercase tracking-wider text-purple-700">Cargo In-Transit</span>
+            <span className="shrink-0 rounded-md bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-600">
               Payload
             </span>
           </div>
@@ -497,7 +497,7 @@ export default function Trips() {
       </div>
 
       {/* Control Bar: Filters & View Switcher */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-[220px] flex-1 sm:flex-initial">
             <Input

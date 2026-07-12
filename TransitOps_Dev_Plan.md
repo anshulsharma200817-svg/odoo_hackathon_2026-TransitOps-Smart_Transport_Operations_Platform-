@@ -93,6 +93,8 @@ All three devs need this before they can work in parallel. Dev A owns the models
 
 **✅ Login role blocker resolved (Dev B/Bhavya):** Added `CustomTokenObtainPairSerializer` (overrides `validate()` to set `data["role"] = self.user.role`) and pointed `LoginView.serializer_class` at it. Independently re-verified by Dev C, not just taken at face value: signed up a fresh account and logged in against the real backend both via a raw `curl` call and through the actual frontend login flow — the live `POST /api/auth/login/` response body genuinely includes `"role":"FLEET_MANAGER"` in both checks, and it persists correctly into the sidebar via `localStorage`.
 
+**⚠ Open risk (found by Dev C during Hour 7 in-browser testing):** No `SIMPLE_JWT` override in `settings.py`, so the access token uses simplejwt's library default lifetime (~5 minutes). Nothing in the frontend calls `POST /api/auth/refresh/` despite it being in this contract and implemented on the backend - once the access token expires mid-session, every `api/*.js` module's mock-fallback logic treats the resulting 401 as "backend unreachable" and silently serves mock data instead, with zero visible warning to the user. Hit this repeatedly during Hour 7 testing (had to re-login every ~5 minutes to keep testing against real data). Not a correctness bug in what's shipped, but a real risk for Hour 8: if the demo run-through takes longer than ~5 minutes without re-logging in, the screen will start showing stale/mock numbers that look plausible but aren't real. Cheapest mitigations for Hour 8: either bump `ACCESS_TOKEN_LIFETIME` in `SIMPLE_JWT` settings for the demo, or just plan to re-login right before presenting.
+
 ### Hour 3 — Vehicle/Driver Serializers + ViewSets
 - [ ] Vehicle CRUD ViewSet + serializer
 - [ ] Driver CRUD ViewSet + serializer
@@ -215,11 +217,11 @@ All three devs need this before they can work in parallel. Dev A owns the models
 - [ ] **Push**
 
 ### Hour 7 — Reports + Polish
-- [ ] Reports page (Fuel Efficiency, Op Cost, ROI table)
-- [ ] CSV download button wired to Dev B's export endpoint
-- [ ] Filters (vehicle type, status, region) applied across dashboard/vehicle/driver views
-- [ ] Responsive pass at mobile width
-- [ ] **Push**
+- [x] Reports page (Fuel Efficiency, Op Cost, ROI table) - verified numbers against raw `/api/vehicles/`, `/api/maintenance/`, `/api/fuel-logs/`, `/api/expenses/` data by hand-computing expected values first
+- [x] CSV download button wired to Dev B's export endpoint - real file download (blob), not a client-generated CSV; response body checked and matches the on-screen table exactly
+- [x] Filters (vehicle type, status, region) applied across dashboard/vehicle/driver views - Dashboard had none before this hour, added and verified against real `/api/dashboard/?status=...` responses; Vehicles already had all three (Hour 3); Drivers only needs `?status=` per contract, already had it
+- [x] Responsive pass at mobile width - and tablet (768px) and desktop, per Dev C's own read of the ask. Found and fixed real overflow bugs: page headers switching to row layout too early (`sm:` → `lg:`) once the persistent sidebar appears at `md`, causing severely squeezed heading/button text; 4 KPI card label+badge rows overflowing their card at tablet width (`min-w-0 truncate` + `shrink-0` fix)
+- [x] **Push**
 
 ### Hour 8 — Demo Run-Through
 - [ ] Full run-through of the Van-05/Alex demo scenario with the whole team

@@ -11,10 +11,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { listVehicles } from "../api/vehicles";
+import { listVehicles, VEHICLE_STATUSES } from "../api/vehicles";
 import { listTrips } from "../api/trips";
 import { getDashboardSummary } from "../api/dashboard";
 import Badge from "../components/ui/Badge";
+import Select from "../components/ui/Select";
 import { TRIP_STATUS_VARIANTS } from "../lib/statusVariants";
 import { VEHICLE_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconRoute, IconTruck, IconUser, IconWrench } from "../components/icons";
@@ -41,20 +42,25 @@ export default function Dashboard() {
   const [trips, setTrips] = useState([]);
   const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(true);
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
 
+  // Vehicles/trips are fetched once (unfiltered) - the donut, weekly chart,
+  // and recent-trips list all need the full picture. Only the /dashboard/
+  // summary itself is re-fetched per filter, matching what the endpoint
+  // actually supports.
   useEffect(() => {
     let mounted = true;
     async function loadData() {
       try {
-        const [vList, tList, dashboardSummary] = await Promise.all([
+        const [vList, tList] = await Promise.all([
           listVehicles().catch(() => []),
           listTrips().catch(() => []),
-          getDashboardSummary().catch(() => EMPTY_SUMMARY),
         ]);
         if (mounted) {
           setVehicles(vList || []);
           setTrips(tList || []);
-          setSummary(dashboardSummary || EMPTY_SUMMARY);
         }
       } finally {
         if (mounted) setLoading(false);
@@ -66,13 +72,46 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Fleet Status donut: /dashboard/ deliberately excludes Retired vehicles
-  // from its counts, so this still needs the raw vehicle list.
-  const totalVehicles = vehicles.length;
-  const availableCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.AVAILABLE).length;
-  const onTripCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.ON_TRIP).length;
-  const inShopCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.IN_SHOP).length;
-  const retiredCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.RETIRED).length;
+  useEffect(() => {
+    let mounted = true;
+    getDashboardSummary({ type: typeFilter, status: statusFilter, region: regionFilter })
+      .catch(() => EMPTY_SUMMARY)
+      .then((data) => {
+        if (mounted) setSummary(data || EMPTY_SUMMARY);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [typeFilter, statusFilter, regionFilter]);
+
+  const types = useMemo(
+    () => [...new Set(vehicles.map((v) => v.type).filter(Boolean))],
+    [vehicles],
+  );
+  const regions = useMemo(
+    () => [...new Set(vehicles.map((v) => v.region).filter(Boolean))],
+    [vehicles],
+  );
+
+  // Fleet Status donut: scoped by the same filters as the summary, so both
+  // stay consistent. /dashboard/ deliberately excludes Retired vehicles
+  // from its own counts, so this still needs the raw vehicle list.
+  const filteredVehicles = useMemo(
+    () =>
+      vehicles.filter(
+        (v) =>
+          (!typeFilter || v.type === typeFilter) &&
+          (!statusFilter || v.status === statusFilter) &&
+          (!regionFilter || v.region === regionFilter),
+      ),
+    [vehicles, typeFilter, statusFilter, regionFilter],
+  );
+
+  const totalVehicles = filteredVehicles.length;
+  const availableCount = filteredVehicles.filter((v) => v.status === VEHICLE_STATUS.AVAILABLE).length;
+  const onTripCount = filteredVehicles.filter((v) => v.status === VEHICLE_STATUS.ON_TRIP).length;
+  const inShopCount = filteredVehicles.filter((v) => v.status === VEHICLE_STATUS.IN_SHOP).length;
+  const retiredCount = filteredVehicles.filter((v) => v.status === VEHICLE_STATUS.RETIRED).length;
 
   const pieData = [
     { name: statusLabel(VEHICLE_STATUS.AVAILABLE), value: availableCount, color: STATUS_COLORS[VEHICLE_STATUS.AVAILABLE] },
@@ -111,7 +150,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-full space-y-6 p-4 sm:p-8 animate-fade-in">
       {/* 1. Simplified, Friendly Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
@@ -144,6 +183,47 @@ export default function Dashboard() {
             Log Maintenance
           </Link>
         </div>
+      </div>
+
+      {/* Filter bar - scopes both the /dashboard/ summary and the donut */}
+      <div className="flex flex-wrap gap-3">
+        <Select className="w-40" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          <option value="">All Types</option>
+          {types.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </Select>
+        <Select className="w-40" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="">All Statuses</option>
+          {VEHICLE_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {statusLabel(s)}
+            </option>
+          ))}
+        </Select>
+        <Select className="w-40" value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}>
+          <option value="">All Regions</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </Select>
+        {(typeFilter || statusFilter || regionFilter) && (
+          <button
+            type="button"
+            onClick={() => {
+              setTypeFilter("");
+              setStatusFilter("");
+              setRegionFilter("");
+            }}
+            className="text-xs font-semibold text-brand-600 underline transition-colors hover:text-brand-800"
+          >
+            Reset filters
+          </button>
+        )}
       </div>
 
       {/* 2. KPI cards - sourced from the real /dashboard/ endpoint, covering
