@@ -127,6 +127,12 @@ class MaintenanceLogViewSet(viewsets.ModelViewSet):
     serializer_class = MaintenanceLogSerializer
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         log = self.get_object()

@@ -127,6 +127,8 @@ class MaintenanceLog(models.Model):
 
     def save(self, *args, **kwargs):
         creating = self._state.adding
+        if creating and self.vehicle.status == Vehicle.Status.RETIRED:
+            raise ValueError("Cannot open a maintenance record for a retired vehicle.")
         super().save(*args, **kwargs)
         if creating and self.status == MaintenanceLog.Status.OPEN:
             self.vehicle.status = Vehicle.Status.IN_SHOP
