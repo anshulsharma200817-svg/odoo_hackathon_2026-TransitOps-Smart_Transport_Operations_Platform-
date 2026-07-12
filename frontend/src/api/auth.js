@@ -36,7 +36,7 @@ function backendUnreachable(error) {
 
 export async function login(email, password) {
   try {
-    const { data } = await client.post("/auth/login/", { email, password });
+    const { data } = await client.post("/auth/login/", { username: email, email, password });
     return data;
   } catch (error) {
     if (!backendUnreachable(error)) {
