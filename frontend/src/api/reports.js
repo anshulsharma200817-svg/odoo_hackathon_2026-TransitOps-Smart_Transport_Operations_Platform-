@@ -88,3 +88,20 @@ export async function downloadReportsCsv() {
   link.remove();
   window.URL.revokeObjectURL(url);
 }
+
+export async function downloadReportsPdf() {
+  let response;
+  try {
+    response = await client.get("/reports/export/pdf/", { responseType: "blob" });
+  } catch {
+    throw new Error("Could not export PDF - the reports endpoint isn't reachable right now.");
+  }
+  const url = window.URL.createObjectURL(response.data);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "reports.pdf";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
