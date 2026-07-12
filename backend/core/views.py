@@ -17,6 +17,7 @@ from .serializers import (
     UserSerializer,
     VehicleSerializer,
 )
+from .permissions import IsFleetManager, IsFleetManagerOrDriver
 
 
 # ---- Auth --------------------------------------------------------------
@@ -81,6 +82,13 @@ class TripViewSet(viewsets.ModelViewSet):
     serializer_class = TripSerializer
     permission_classes = [IsAuthenticated]
     filterset_fields = ["status"]
+
+    def get_permissions(self):
+        if self.action in ["dispatch", "cancel"]:
+            return [IsAuthenticated(), IsFleetManager()]
+        elif self.action == "complete":
+            return [IsAuthenticated(), IsFleetManagerOrDriver()]
+        return super().get_permissions()
 
     @action(detail=True, methods=["post"])
     def dispatch(self, request, pk=None):
