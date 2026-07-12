@@ -1,7 +1,9 @@
 import client from "./client";
+import { DRIVER_STATUS, DRIVER_STATUSES } from "../lib/enumLabels";
+
+export { DRIVER_STATUSES };
 
 const MOCK_KEY = "mock_drivers";
-export const DRIVER_STATUSES = ["Available", "On Trip", "Off Duty", "Suspended"];
 
 function readMock() {
   try {
@@ -26,7 +28,7 @@ function seedMock() {
         license_expiry_date: "2027-04-01",
         contact_number: "9876543210",
         safety_score: 92,
-        status: "Available",
+        status: DRIVER_STATUS.AVAILABLE,
       },
       {
         id: "d-2",
@@ -36,7 +38,7 @@ function seedMock() {
         license_expiry_date: "2024-01-15",
         contact_number: "9123456780",
         safety_score: 78,
-        status: "Off Duty",
+        status: DRIVER_STATUS.OFF_DUTY,
       },
       {
         id: "d-3",
@@ -46,7 +48,7 @@ function seedMock() {
         license_expiry_date: "2026-11-20",
         contact_number: "9988776655",
         safety_score: 65,
-        status: "Suspended",
+        status: DRIVER_STATUS.SUSPENDED,
       },
     ]);
   }
@@ -90,7 +92,7 @@ export async function listAvailableDrivers() {
   } catch (error) {
     if (!backendUnreachable(error)) throw error;
     return readMock().filter(
-      (d) => d.status === "Available" && d.status !== "Suspended" && !isLicenseExpired(d),
+      (d) => d.status === DRIVER_STATUS.AVAILABLE && !isLicenseExpired(d),
     );
   }
 }

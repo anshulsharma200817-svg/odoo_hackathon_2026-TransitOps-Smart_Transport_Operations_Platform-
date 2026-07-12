@@ -16,13 +16,14 @@ import { listDrivers } from "../api/drivers";
 import { listTrips } from "../api/trips";
 import Badge from "../components/ui/Badge";
 import { TRIP_STATUS_VARIANTS } from "../lib/statusVariants";
+import { VEHICLE_STATUS, TRIP_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconRoute, IconTruck, IconUser, IconWrench } from "../components/icons";
 
 const STATUS_COLORS = {
-  Available: "#10b981", // emerald
-  "On Trip": "#3b82f6", // blue
-  "In Shop": "#f59e0b", // amber
-  Retired: "#64748b", // slate
+  [VEHICLE_STATUS.AVAILABLE]: "#10b981", // emerald
+  [VEHICLE_STATUS.ON_TRIP]: "#3b82f6", // blue
+  [VEHICLE_STATUS.IN_SHOP]: "#f59e0b", // amber
+  [VEHICLE_STATUS.RETIRED]: "#64748b", // slate
 };
 
 const WEEKLY_TREND = [
@@ -67,22 +68,12 @@ export default function Dashboard() {
 
   // Fleet Counts
   const totalVehicles = vehicles.length;
-  const availableCount = vehicles.filter(
-    (v) => v.status === "Available" || v.status === "AVAILABLE"
-  ).length;
-  const onTripCount = vehicles.filter(
-    (v) => v.status === "On Trip" || v.status === "ON_TRIP"
-  ).length;
-  const inShopCount = vehicles.filter(
-    (v) => v.status === "In Shop" || v.status === "IN_SHOP"
-  ).length;
-  const retiredCount = vehicles.filter(
-    (v) => v.status === "Retired" || v.status === "RETIRED"
-  ).length;
+  const availableCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.AVAILABLE).length;
+  const onTripCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.ON_TRIP).length;
+  const inShopCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.IN_SHOP).length;
+  const retiredCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.RETIRED).length;
 
-  const activeTripsCount = trips.filter(
-    (t) => t.status === "Dispatched" || t.status === "DISPATCHED"
-  ).length;
+  const activeTripsCount = trips.filter((t) => t.status === TRIP_STATUS.DISPATCHED).length;
 
   const avgSafetyScore = drivers.length
     ? Math.round(
@@ -92,10 +83,10 @@ export default function Dashboard() {
 
   // Donut chart data
   const pieData = [
-    { name: "Available", value: availableCount, color: STATUS_COLORS.Available },
-    { name: "On Trip", value: onTripCount, color: STATUS_COLORS["On Trip"] },
-    { name: "In Shop", value: inShopCount, color: STATUS_COLORS["In Shop"] },
-    { name: "Retired", value: retiredCount, color: STATUS_COLORS.Retired },
+    { name: statusLabel(VEHICLE_STATUS.AVAILABLE), value: availableCount, color: STATUS_COLORS[VEHICLE_STATUS.AVAILABLE] },
+    { name: statusLabel(VEHICLE_STATUS.ON_TRIP), value: onTripCount, color: STATUS_COLORS[VEHICLE_STATUS.ON_TRIP] },
+    { name: statusLabel(VEHICLE_STATUS.IN_SHOP), value: inShopCount, color: STATUS_COLORS[VEHICLE_STATUS.IN_SHOP] },
+    { name: statusLabel(VEHICLE_STATUS.RETIRED), value: retiredCount, color: STATUS_COLORS[VEHICLE_STATUS.RETIRED] },
   ].filter((item) => item.value > 0);
 
   const userEmail = localStorage.getItem("user_email") || "Admin";
@@ -398,7 +389,7 @@ export default function Dashboard() {
                     {trip.cargo_weight} kg · {trip.planned_distance} km
                   </span>
                   <Badge variant={TRIP_STATUS_VARIANTS[trip.status] || "gray"} className="px-2.5 py-1 text-xs font-bold shrink-0">
-                    {trip.status}
+                    {statusLabel(trip.status)}
                   </Badge>
                 </div>
               </div>

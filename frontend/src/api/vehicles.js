@@ -1,7 +1,9 @@
 import client from "./client";
+import { VEHICLE_STATUS, VEHICLE_STATUSES } from "../lib/enumLabels";
+
+export { VEHICLE_STATUSES };
 
 const MOCK_KEY = "mock_vehicles";
-export const VEHICLE_STATUSES = ["Available", "On Trip", "In Shop", "Retired"];
 
 export function readMock() {
   try {
@@ -26,7 +28,7 @@ function seedMock() {
         max_load_capacity: 500,
         odometer: 12000,
         acquisition_cost: 850000,
-        status: "Available",
+        status: VEHICLE_STATUS.AVAILABLE,
         region: "North",
       },
       {
@@ -37,7 +39,7 @@ function seedMock() {
         max_load_capacity: 5000,
         odometer: 45210,
         acquisition_cost: 2200000,
-        status: "In Shop",
+        status: VEHICLE_STATUS.IN_SHOP,
         region: "West",
       },
       {
@@ -48,7 +50,7 @@ function seedMock() {
         max_load_capacity: 12000,
         odometer: 8100,
         acquisition_cost: 3100000,
-        status: "Retired",
+        status: VEHICLE_STATUS.RETIRED,
         region: "South",
       },
     ]);
@@ -92,7 +94,7 @@ export async function listAvailableVehicles() {
     return data;
   } catch (error) {
     if (!backendUnreachable(error)) throw error;
-    return readMock().filter((v) => v.status === "Available");
+    return readMock().filter((v) => v.status === VEHICLE_STATUS.AVAILABLE);
   }
 }
 

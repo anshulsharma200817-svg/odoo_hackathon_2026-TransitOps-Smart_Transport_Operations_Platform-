@@ -7,6 +7,7 @@ import Modal from "../components/ui/Modal";
 import { useToast } from "../components/ui/ToastProvider";
 import { listVehicles, createVehicle, updateVehicle, VEHICLE_STATUSES } from "../api/vehicles";
 import { VEHICLE_STATUS_VARIANTS } from "../lib/statusVariants";
+import { VEHICLE_STATUS, statusLabel } from "../lib/enumLabels";
 import { IconTruck, IconWrench, IconRoute } from "../components/icons";
 
 const EMPTY_FORM = {
@@ -123,7 +124,7 @@ function VehicleForm({ initialValues, onSubmit, onCancel }) {
         >
           {VEHICLE_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {statusLabel(s)}
             </option>
           ))}
         </Select>
@@ -195,8 +196,8 @@ export default function Vehicles() {
 
   // Quick KPI metrics
   const totalFleetCount = vehicles.length;
-  const activeOnTripCount = vehicles.filter((v) => v.status === "On Trip").length;
-  const inShopCount = vehicles.filter((v) => v.status === "In Shop").length;
+  const activeOnTripCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.ON_TRIP).length;
+  const inShopCount = vehicles.filter((v) => v.status === VEHICLE_STATUS.IN_SHOP).length;
   const totalFleetValue = vehicles.reduce((acc, v) => acc + (Number(v.acquisition_cost) || 0), 0);
 
   function openCreate() {
@@ -272,9 +273,9 @@ export default function Vehicles() {
         </div>
 
         <div
-          onClick={() => setStatusFilter(statusFilter === "On Trip" ? "" : "On Trip")}
+          onClick={() => setStatusFilter(statusFilter === VEHICLE_STATUS.ON_TRIP ? "" : VEHICLE_STATUS.ON_TRIP)}
           className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl ${
-            statusFilter === "On Trip"
+            statusFilter === VEHICLE_STATUS.ON_TRIP
               ? "border-emerald-500/40 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 shadow-md ring-2 ring-emerald-500/20"
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
@@ -299,9 +300,9 @@ export default function Vehicles() {
         </div>
 
         <div
-          onClick={() => setStatusFilter(statusFilter === "In Shop" ? "" : "In Shop")}
+          onClick={() => setStatusFilter(statusFilter === VEHICLE_STATUS.IN_SHOP ? "" : VEHICLE_STATUS.IN_SHOP)}
           className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl ${
-            statusFilter === "In Shop"
+            statusFilter === VEHICLE_STATUS.IN_SHOP
               ? "border-amber-500/40 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/30 shadow-md ring-2 ring-amber-500/20"
               : "border-slate-200/80 bg-white/90 hover:border-slate-300"
           }`}
@@ -363,7 +364,7 @@ export default function Vehicles() {
             <option value="">All Statuses</option>
             {VEHICLE_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </Select>
@@ -479,10 +480,10 @@ export default function Vehicles() {
                   </div>
                   <Badge variant={VEHICLE_STATUS_VARIANTS[v.status] || "gray"} className="px-3 py-1 font-semibold">
                     <span className="flex items-center gap-1.5">
-                      {v.status === "On Trip" && (
+                      {v.status === VEHICLE_STATUS.ON_TRIP && (
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                       )}
-                      {v.status}
+                      {statusLabel(v.status)}
                     </span>
                   </Badge>
                 </div>
@@ -577,7 +578,7 @@ export default function Vehicles() {
                     <td className="px-6 py-4 font-semibold text-slate-900">₹{Number(v.acquisition_cost || 0).toLocaleString()}</td>
                     <td className="px-6 py-4">
                       <Badge variant={VEHICLE_STATUS_VARIANTS[v.status] || "gray"} className="px-2.5 py-1 font-semibold">
-                        {v.status}
+                        {statusLabel(v.status)}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-right">
